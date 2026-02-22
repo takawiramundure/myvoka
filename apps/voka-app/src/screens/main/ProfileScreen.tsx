@@ -1,20 +1,73 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/useAuthStore';
 
 export default function ProfileScreen() {
     const signOut = useAuthStore((s) => s.signOut);
 
     return (
-        <View className="flex-1 justify-center items-center bg-background px-6">
-            <Text className="text-text-primary text-2xl font-nunito font-bold mb-12">Profile Settings</Text>
+        <SafeAreaView className="flex-1 bg-background pt-4">
 
-            <TouchableOpacity
-                className="w-full bg-surface-light border border-error py-4 rounded-2xl items-center"
-                onPress={signOut}
-            >
-                <Text className="text-error font-poppins font-semibold text-lg">Log Out</Text>
-            </TouchableOpacity>
-        </View>
+            <View className="px-6 mb-6 flex-row items-center justify-between">
+                <Text className="text-text-primary text-3xl font-nunito font-bold">Profile</Text>
+                <TouchableOpacity className="p-2">
+                    <Ionicons name="settings-outline" size={24} color="#8B949E" />
+                </TouchableOpacity>
+            </View>
+
+            <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
+
+                {/* Profile Header */}
+                <View className="items-center mb-10">
+                    <View className="w-24 h-24 rounded-full bg-surface items-center justify-center border-2 border-primary/20 mb-4 overflow-hidden">
+                        <Ionicons name="person" size={40} color="#8B949E" />
+                    </View>
+                    <Text className="text-text-primary text-xl font-poppins font-semibold">Jane Doe</Text>
+                    <Text className="text-text-secondary font-inter">Joined October 2026</Text>
+                </View>
+
+                {/* Settings Links */}
+                <View className="bg-surface border border-surface-light rounded-2xl mb-6 overflow-hidden">
+
+                    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-surface-light">
+                        <View className="flex-row items-center">
+                            <Ionicons name="person-outline" size={20} color="#E8A020" />
+                            <Text className="text-text-primary font-inter ml-3">Edit Profile</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-surface-light">
+                        <View className="flex-row items-center">
+                            <Ionicons name="notifications-outline" size={20} color="#E8A020" />
+                            <Text className="text-text-primary font-inter ml-3">Notifications</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity className="flex-row items-center justify-between p-4">
+                        <View className="flex-row items-center">
+                            <Ionicons name="lock-closed-outline" size={20} color="#E8A020" />
+                            <Text className="text-text-primary font-inter ml-3">Privacy & Security</Text>
+                        </View>
+                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
+                    </TouchableOpacity>
+
+                </View>
+
+                {/* Log Out Button */}
+                <TouchableOpacity
+                    onPress={signOut}
+                    className="flex-row items-center justify-center p-4 rounded-xl bg-error/10 mb-8"
+                >
+                    <Ionicons name="log-out-outline" size={20} color="#d32f2f" />
+                    <Text className="text-error font-poppins font-semibold ml-2 text-base">Log Out</Text>
+                </TouchableOpacity>
+
+            </ScrollView>
+
+        </SafeAreaView>
     );
 }

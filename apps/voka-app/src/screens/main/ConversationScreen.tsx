@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import WaveformAnimation from '../../components/WaveformAnimation';
 import RecordButton from '../../components/RecordButton';
+import CorrectionsOverlay from '../../components/CorrectionsOverlay';
 import { useConversationStore } from '../../stores/useConversationStore';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
@@ -37,7 +38,7 @@ export default function ConversationScreen() {
             <View className="flex-1 items-center justify-center px-6">
 
                 {/* Tutor Avatar/Waveform Area */}
-                <View className="mb-12 w-full h-48 items-center justify-center">
+                <View className="mb-4 w-full h-48 items-center justify-center">
                     <WaveformAnimation isSpeaking={isTutorSpeaking} />
 
                     <Text className="text-text-primary text-lg font-inter text-center mt-6 h-14">
@@ -49,6 +50,9 @@ export default function ConversationScreen() {
                         }
                     </Text>
                 </View>
+
+                {/* Grammar Corrections */}
+                <CorrectionsOverlay />
 
             </View>
 

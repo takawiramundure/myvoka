@@ -81,7 +81,7 @@ export default function RecordButton() {
             addMessage({
                 id: Date.now().toString(),
                 role: 'user',
-                text: 'Nso idi emi?', // "What is this?" in Ibibio
+                text: 'Nso di nmi?', // Intentional error for Ibibio instead of "Nso idi emi?"
                 timestamp: new Date()
             });
 
@@ -89,14 +89,20 @@ export default function RecordButton() {
             await delay(1000); // Fake GPT Delay
             setCurrentTranscript('');
 
-            const tutorResponse = "Emi edi ewa. (This is a dog.) Good attempt!";
+            const tutorResponse = "Emi edi ewa. Emi kedi mme ewa in Ibibio.";
 
             addMessage({
                 id: (Date.now() + 1).toString(),
                 role: 'tutor',
                 text: tutorResponse,
                 timestamp: new Date(),
-                corrections: [] // Mock empty corrections
+                corrections: [{
+                    type: 'grammar',
+                    original: 'Nso di nmi?',
+                    corrected: 'Nso idi emi?',
+                    explanation: 'Remember to use "emi" for "this" when asking questions near you.',
+                    severity: 'info'
+                }]
             });
 
             // Fire ElevenLabs TTS
