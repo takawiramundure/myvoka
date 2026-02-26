@@ -15,26 +15,19 @@ interface Exercise {
 }
 
 const MOCK_EXERCISES: Exercise[] = [
-    {
-        id: '1',
-        type: 'translate',
-        question: 'Amesiere, ami edi Learner',
-        target: 'Good morning, I am Learner',
-        options: ['Good', 'morning', 'I', 'am', 'Learner', 'How', 'is', 'day']
-    },
-    {
-        id: '2',
-        type: 'match',
-        question: 'Match the syllables for "Hello" (Mesiere)',
-        target: 'Me-sie-re',
-        options: ['Me', 'sie', 're', 'ka', 'ba', 'ni']
-    },
-    {
-        id: '3',
-        type: 'speak',
-        question: 'Say "Mesiere"',
-        target: 'Mesiere'
-    }
+    { id: '1', type: 'translate', question: 'Amesiere', target: 'Good morning', options: ['Good', 'morning', 'night', 'How', 'are', 'you'] },
+    { id: '2', type: 'translate', question: 'Aba die?', target: 'How are you?', options: ['How', 'are', 'you', 'Good', 'fine', 'I'] },
+    { id: '3', type: 'translate', question: 'Sosongo', target: 'Thank you', options: ['Thank', 'you', 'Welcome', 'Please', 'Yes', 'No'] },
+    { id: '4', type: 'translate', question: 'Esiere', target: 'Good night', options: ['Good', 'night', 'morning', 'Sleep', 'well', 'bye'] },
+    { id: '5', type: 'translate', question: 'Ami mmehë', target: 'I am fine', options: ['I', 'am', 'fine', 'Good', 'not', 'sad'] },
+    { id: '6', type: 'match', question: 'A-me-sie-re', target: 'Good-mor-ning', options: ['A', 'me', 'sie', 're', 'Good', 'mor', 'ning'] },
+    { id: '7', type: 'translate', question: 'Abasi akpeme fi', target: 'God protect you', options: ['God', 'protect', 'you', 'bless', 'save', 'keep'] },
+    { id: '8', type: 'translate', question: 'Mbuot', target: 'Friend', options: ['Friend', 'Family', 'Brother', 'Sister', 'Human', 'Person'] },
+    { id: '9', type: 'translate', question: 'Hello', target: 'Mesiere', options: ['Mesiere', 'Amesiere', 'Esiere', 'Sosongo', 'Mbuot', 'Di do'] },
+    { id: '10', type: 'translate', question: 'Sweet', target: 'Ama nte', options: ['Ama nte', 'Daba daba', 'Sosongo', 'Mbuot', 'Esiere', 'Di do'] },
+    { id: '11', type: 'translate', question: 'Come', target: 'Di do', options: ['Di do', 'Sosongo', 'Aba die', 'Ka do', 'Ami', 'Edi'] },
+    { id: '12', type: 'speak', question: 'Say "Sosongo"', target: 'Sosongo' },
+    { id: '13', type: 'translate', question: 'Ami edi Learner', target: 'I am Learner', options: ['I', 'am', 'Learner', 'He', 'is', 'Teacher'] },
 ];
 
 export default function LessonSessionScreen() {
@@ -42,22 +35,33 @@ export default function LessonSessionScreen() {
     const route = useRoute<any>();
     const { addXP, decrementHeart, hearts } = useConversationStore();
 
+    const [sessionExercises, setSessionExercises] = useState<Exercise[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-    const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
+    const [feedback, setFeedback] = useState<'correct' | null | 'incorrect'>(null);
     const [progress] = useState(new Animated.Value(0));
 
-    const currentExercise = MOCK_EXERCISES[currentIndex];
+    React.useEffect(() => {
+        // Randomize and pick 7 exercises for this session
+        const shuffled = [...MOCK_EXERCISES].sort(() => 0.5 - Math.random());
+        setSessionExercises(shuffled.slice(0, 7));
+    }, []);
+
+    const currentExercise = sessionExercises[currentIndex];
+
+    if (!currentExercise && !isFinished) return null; // Wait for initialization
 
     const handleSubmit = () => {
+        const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
+
         const answer = currentExercise.type === 'match' ? selectedOptions.join('-') : selectedOptions.join(' ');
-        if (answer === currentExercise.target) {
+        if (normalize(answer) === normalize(currentExercise.target)) {
             setFeedback('correct');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             addXP(10);
 
-            const nextProgress = (currentIndex + 1) / MOCK_EXERCISES.length;
+            const nextProgress = (currentIndex + 1) / sessionExercises.length;
             Animated.timing(progress, {
                 toValue: nextProgress,
                 duration: 500,
@@ -71,7 +75,7 @@ export default function LessonSessionScreen() {
     };
 
     const handleContinue = () => {
-        if (currentIndex < MOCK_EXERCISES.length - 1) {
+        if (currentIndex < sessionExercises.length - 1) {
             setFeedback(null);
             setSelectedOptions([]);
             setCurrentIndex(currentIndex + 1);
@@ -86,9 +90,7 @@ export default function LessonSessionScreen() {
         } else {
             setSelectedOptions([...selectedOptions, option]);
             // Pronounce the word as the user picks it
-            if (currentExercise.type !== 'match') {
-                playElevenLabsAudio(option).catch(err => console.error("Audio error:", err));
-            }
+            playElevenLabsAudio(option).catch(err => console.error("Audio error:", err));
         }
     };
 
@@ -162,8 +164,14 @@ export default function LessonSessionScreen() {
                     <View className="w-20 h-20 bg-primary/20 rounded-2xl items-center justify-center mr-4">
                         <Text className="text-4xl text-white">🦉</Text>
                     </View>
-                    <View className="bg-surface border border-surface-light p-4 rounded-2xl flex-1">
-                        <Text className="text-text-primary text-lg">{currentExercise.question}</Text>
+                    <View className="bg-surface border border-surface-light p-4 rounded-2xl flex-1 flex-row items-center justify-between">
+                        <Text className="text-text-primary text-lg flex-1">{currentExercise.question}</Text>
+                        <TouchableOpacity
+                            onPress={() => playElevenLabsAudio(currentExercise.question)}
+                            className="bg-primary/10 p-2 rounded-full ml-2"
+                        >
+                            <Ionicons name="volume-medium" size={24} color="#1A6B4A" />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
