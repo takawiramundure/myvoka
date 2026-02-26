@@ -1,0 +1,14 @@
+{
+    "functions": {
+        "source": "apps/voka-functions"
+    },
+    "emulators": {
+        "functions": {
+            "port": 5001
+        },
+        "ui": {
+            "enabled": true
+        },
+        "singleProjectMode": true
+    }
+}

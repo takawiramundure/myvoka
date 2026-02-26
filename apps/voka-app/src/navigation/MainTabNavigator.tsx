@@ -2,15 +2,15 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import HomeScreen from '../screens/main/HomeScreen';
+import LearnScreen from '../screens/main/LearnScreen';
 import ConversationScreen from '../screens/main/ConversationScreen';
-import HistoryScreen from '../screens/main/HistoryScreen';
 import ProgressScreen from '../screens/main/ProgressScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 
 export type MainTabParamList = {
     Home: undefined;
+    Learn: undefined;
     Conversation: undefined;
-    History: undefined;
     Progress: undefined;
     Profile: undefined;
 };
@@ -35,8 +35,8 @@ export default function MainTabNavigator() {
                     let iconName: keyof typeof Ionicons.glyphMap = 'home';
 
                     if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
-                    else if (route.name === 'Conversation') iconName = focused ? 'mic' : 'mic-outline';
-                    else if (route.name === 'History') iconName = focused ? 'time' : 'time-outline';
+                    else if (route.name === 'Learn') iconName = focused ? 'school' : 'school-outline';
+                    else if (route.name === 'Conversation') iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
                     else if (route.name === 'Progress') iconName = focused ? 'bar-chart' : 'bar-chart-outline';
                     else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
 
@@ -45,8 +45,8 @@ export default function MainTabNavigator() {
             })}
         >
             <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Learn" component={LearnScreen} />
             <Tab.Screen name="Conversation" component={ConversationScreen} />
-            <Tab.Screen name="History" component={HistoryScreen} />
             <Tab.Screen name="Progress" component={ProgressScreen} />
             <Tab.Screen name="Profile" component={ProfileScreen} />
         </Tab.Navigator>

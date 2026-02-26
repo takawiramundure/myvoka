@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useConversationStore } from '../../stores/useConversationStore';
+import { useConversationStore } from '../stores/useConversationStore';
 import clsx from 'clsx';
 
 export default function CorrectionsOverlay() {

@@ -4,7 +4,7 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import AuthStack from './AuthStack';
-import MainTabNavigator from './MainTabNavigator';
+import MainStack from './MainStack';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function RootNavigator() {
@@ -27,7 +27,7 @@ export default function RootNavigator() {
 
     return (
         <NavigationContainer>
-            {user ? <MainTabNavigator /> : <AuthStack />}
+            {user ? <MainStack /> : <AuthStack />}
         </NavigationContainer>
     );
 }

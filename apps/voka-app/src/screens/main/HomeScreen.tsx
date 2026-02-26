@@ -3,10 +3,12 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Dimensions } fr
 import { SUPPORTED_LANGUAGES, LanguageOption } from '../../constants/languages';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import clsx from 'clsx'; // Install this if we haven't already
+import clsx from 'clsx';
+import { useConversationStore } from '../../stores/useConversationStore';
 
 export default function HomeScreen() {
     const navigation = useNavigation<any>();
+    const { setSelectedLanguage } = useConversationStore();
 
     const featuredLanguage = SUPPORTED_LANGUAGES.find(l => l.featured);
     const otherLanguages = SUPPORTED_LANGUAGES.filter(l => !l.featured);
@@ -18,7 +20,10 @@ export default function HomeScreen() {
             <TouchableOpacity
                 activeOpacity={0.7}
                 disabled={isUnavailable}
-                onPress={() => navigation.navigate('Conversation', { languageId: lang.id })}
+                onPress={() => {
+                    setSelectedLanguage(lang.id as any);
+                    navigation.navigate('Learn');
+                }}
                 className={clsx(
                     "bg-surface rounded-2xl border mb-3 overflow-hidden",
                     isLarge ? "p-6 border-primary" : "p-4 flex-1 m-1 border-surface-light",

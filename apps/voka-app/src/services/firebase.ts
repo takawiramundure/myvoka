@@ -1,7 +1,8 @@
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -12,7 +13,11 @@ const firebaseConfig = {
     appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
 };
 
-export const app = initializeApp(firebaseConfig);
+export const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
+export const functions = getFunctions(app);
+
+// Use emulator only if manually forced or in specific local dev scenarios
+// connectFunctionsEmulator(functions, '192.168.2.188', 5001);

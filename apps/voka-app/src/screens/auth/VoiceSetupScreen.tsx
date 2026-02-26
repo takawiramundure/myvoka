@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../../navigation/AuthStack';
@@ -10,10 +10,11 @@ type Props = {
 
 export default function VoiceSetupScreen({ navigation }: Props) {
     const setUser = useAuthStore((s) => s.setUser);
+    const [selectedVoice, setSelectedVoice] = useState<'Eka' | 'Emem'>('Eka');
 
     // Mock finalizing registration and logging in
     const handleFinishSetup = () => {
-        setUser({ uid: 'mock-uid-123', email: 'test@voka.ai' } as any);
+        setUser({ uid: 'mock-uid-123', email: 'test@voka.ai', voice: selectedVoice } as any);
     };
 
     return (
@@ -22,12 +23,18 @@ export default function VoiceSetupScreen({ navigation }: Props) {
             <Text className="text-text-secondary font-inter mb-8 text-center text-base">Select the voice you want to learn with.</Text>
 
             <View className="flex-row justify-between w-full mb-8">
-                <TouchableOpacity className="flex-1 bg-surface-light border-2 border-primary rounded-2xl items-center py-8 mr-2">
+                <TouchableOpacity
+                    className={`flex-1 bg-surface-light border-2 rounded-2xl items-center py-8 mr-2 ${selectedVoice === 'Eka' ? 'border-primary' : 'border-transparent'}`}
+                    onPress={() => setSelectedVoice('Eka')}
+                >
                     <Text className="text-4xl mb-4">👩🏾</Text>
                     <Text className="text-text-primary font-poppins font-semibold">Eka</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity className="flex-1 bg-surface-light border-2 border-transparent rounded-2xl items-center py-8 ml-2">
+                <TouchableOpacity
+                    className={`flex-1 bg-surface-light border-2 rounded-2xl items-center py-8 ml-2 ${selectedVoice === 'Emem' ? 'border-primary' : 'border-transparent'}`}
+                    onPress={() => setSelectedVoice('Emem')}
+                >
                     <Text className="text-4xl mb-4">👨🏾</Text>
                     <Text className="text-text-primary font-poppins font-semibold">Emem</Text>
                 </TouchableOpacity>

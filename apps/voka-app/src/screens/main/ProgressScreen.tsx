@@ -78,6 +78,33 @@ export default function ProgressScreen() {
                     </View>
                 </View>
 
+                {/* Session History Section */}
+                <View className="flex-row items-center justify-between mb-4">
+                    <Text className="text-text-primary font-poppins font-semibold text-lg">Recent History</Text>
+                    <Text className="text-primary text-sm font-inter">View All</Text>
+                </View>
+
+                {[
+                    { id: '1', date: 'Oct 23', lang: 'Ibibio', duration: '12 min' },
+                    { id: '2', date: 'Oct 21', lang: 'Ibibio', duration: '5 min' },
+                    { id: '3', date: 'Oct 15', lang: 'Yoruba', duration: '20 min' },
+                ].map((session) => (
+                    <View key={session.id} className="bg-surface border border-surface-light rounded-2xl p-4 mb-4 flex-row items-center justify-between">
+                        <View className="flex-row items-center">
+                            <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center mr-3">
+                                <Ionicons name="chatbubbles" size={18} color="#1A6B4A" />
+                            </View>
+                            <View>
+                                <Text className="text-text-primary font-inter font-semibold">{session.lang} Practice</Text>
+                                <Text className="text-text-secondary text-xs">{session.date} • {session.duration}</Text>
+                            </View>
+                        </View>
+                        <Ionicons name="chevron-forward" size={16} color="#8B949E" />
+                    </View>
+                ))}
+
+                <View className="h-10" />
+
             </ScrollView>
         </SafeAreaView>
     );

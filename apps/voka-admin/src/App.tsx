@@ -1,14 +1,23 @@
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AdminLayout from './components/layout/AdminLayout';
+import Dashboard from './pages/Dashboard';
+import Languages from './pages/Languages';
+import Users from './pages/Users';
+import Settings from './pages/Settings';
 
-function App() {
+export default function App() {
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="font-nunito text-4xl font-bold text-text-primary">Voká Admin Portal</h1>
-        <p className="mt-4 font-inter text-text-secondary">Dashboard starting soon...</p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AdminLayout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/languages" element={<Languages />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/settings" element={<Settings />} />
+        </Routes>
+      </AdminLayout>
+    </BrowserRouter>
   );
 }
-
-export default App;

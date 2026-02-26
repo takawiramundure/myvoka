@@ -10,6 +10,12 @@ export const playElevenLabsAudio = async (text: string, voiceId: string = "eOHsv
         const { setTutorSpeaking } = useConversationStore.getState();
         setTutorSpeaking(true);
 
+        if (!API_KEY) {
+            console.warn("⚠️ EXPO_PUBLIC_ELEVENLABS_API_KEY is missing from .env! Cannot play TTS audio.");
+            setTutorSpeaking(false);
+            return;
+        }
+
         // Using the REST API directly for React Native compatibility
         const response = await fetch(
             `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
@@ -34,7 +40,8 @@ export const playElevenLabsAudio = async (text: string, voiceId: string = "eOHsv
         );
 
         if (!response.ok) {
-            throw new Error(`ElevenLabs API error: ${response.statusText}`);
+            const errorText = await response.text();
+            throw new Error(`ElevenLabs API error: ${response.status} ${errorText}`);
         }
 
         // Convert the response to a blob, then create a local URI using FileReader

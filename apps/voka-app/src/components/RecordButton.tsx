@@ -9,9 +9,12 @@ import Animated, {
     withSpring
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
-import { useConversationStore } from '../../stores/useConversationStore';
+import { useConversationStore } from '../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
-import { playElevenLabsAudio } from '../../services/elevenlabs';
+import { playElevenLabsAudio } from '../services/elevenlabs';
+import { app, functions } from '../services/firebase';
+import { httpsCallable } from 'firebase/functions';
+import * as FileSystem from 'expo-file-system/legacy';
 
 // Helper to wait
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
@@ -19,7 +22,18 @@ const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export default function RecordButton() {
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
     const isRecording = useConversationStore((s) => s.isRecording);
-    const { setRecording: setRecordingState, addMessage, setCurrentTranscript } = useConversationStore((s) => s);
+    const {
+        setRecording: setRecordingState,
+        addMessage,
+        setCurrentTranscript,
+        sessionPhase,
+        setSessionPhase,
+        quizQuestionIndex,
+        setQuizQuestionIndex,
+        messages,
+        activeMode,
+        selectedLanguage
+    } = useConversationStore();
 
     // Animation for the pulsing effect
     const scale = useSharedValue(1);
@@ -68,47 +82,84 @@ export default function RecordButton() {
         setRecordingState(false);
 
         if (recording) {
-            await recording.stopAndUnloadAsync();
-            await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+            try {
+                await recording.stopAndUnloadAsync();
+                await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-            const uri = recording.getURI();
-            console.log('Recording stopped and stored at', uri);
+                const uri = recording.getURI();
+                console.log('Recording stopped and stored at', uri);
 
-            // Simulate Processing Pipeline
-            setCurrentTranscript('Processing audio...');
-            await delay(1000); // Fake STT Delay
+                if (!uri) return;
 
-            addMessage({
-                id: Date.now().toString(),
-                role: 'user',
-                text: 'Nso di nmi?', // Intentional error for Ibibio instead of "Nso idi emi?"
-                timestamp: new Date()
-            });
+                setCurrentTranscript('Transcribing...');
 
-            setCurrentTranscript('Thinking...');
-            await delay(1000); // Fake GPT Delay
-            setCurrentTranscript('');
+                // 1. Convert audio file to Base64
+                const base64Audio = await FileSystem.readAsStringAsync(uri, {
+                    encoding: 'base64',
+                });
 
-            const tutorResponse = "Emi edi ewa. Emi kedi mme ewa in Ibibio.";
+                // 2. Call Firebase Cloud Function
+                const analyzeAudioFn = httpsCallable(functions, 'analyzeAudio');
 
-            addMessage({
-                id: (Date.now() + 1).toString(),
-                role: 'tutor',
-                text: tutorResponse,
-                timestamp: new Date(),
-                corrections: [{
-                    type: 'grammar',
-                    original: 'Nso di nmi?',
-                    corrected: 'Nso idi emi?',
-                    explanation: 'Remember to use "emi" for "this" when asking questions near you.',
-                    severity: 'info'
-                }]
-            });
+                // Get history for context (last 5 messages)
+                const history = messages.slice(-5);
 
-            // Fire ElevenLabs TTS
-            await playElevenLabsAudio(tutorResponse);
+                const result: any = await analyzeAudioFn({
+                    audio: base64Audio,
+                    sessionPhase: sessionPhase,
+                    history: history,
+                    language: selectedLanguage,
+                    mode: activeMode
+                });
 
-            setRecording(null);
+                const { userText, tutorResponse, corrections, nextPhase } = result.data as { userText: string, tutorResponse: string, corrections: any[], nextPhase?: string };
+
+                // 3. Update UI with User Text
+                addMessage({
+                    id: Date.now().toString(),
+                    role: 'user',
+                    text: userText,
+                    timestamp: new Date()
+                });
+
+                setCurrentTranscript('Correcting...');
+                await delay(500);
+                setCurrentTranscript('');
+
+                // 4. Update UI with Tutor Response
+                addMessage({
+                    id: (Date.now() + 1).toString(),
+                    role: 'tutor',
+                    text: tutorResponse,
+                    timestamp: new Date(),
+                    corrections: corrections && corrections.length > 0 ? corrections : undefined
+                });
+
+                // 5. Fire ElevenLabs TTS
+                await playElevenLabsAudio(tutorResponse);
+
+                // 6. Handle automatic phase transitions
+                if (nextPhase) {
+                    setSessionPhase(nextPhase as any);
+                } else if (sessionPhase === 'greeting') {
+                    setSessionPhase('quiz');
+                } else if (sessionPhase === 'quiz') {
+                    // Logic for quiz index (if not guided by nextPhase)
+                    if (quizQuestionIndex < 2) {
+                        setQuizQuestionIndex(quizQuestionIndex + 1);
+                    } else {
+                        setSessionPhase('conversation'); // Default to conversation after quiz
+                    }
+                }
+
+            } catch (err) {
+                console.error('AI Processing Error:', err);
+                setCurrentTranscript('Error processing voice.');
+                await delay(2000);
+                setCurrentTranscript('');
+            } finally {
+                setRecording(null);
+            }
         }
     }
 
