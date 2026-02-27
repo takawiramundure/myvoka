@@ -4,12 +4,14 @@ import MainTabNavigator from './MainTabNavigator';
 import LessonSessionScreen from '../screens/main/LessonSessionScreen';
 import EditProfileScreen from '../screens/main/EditProfileScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
+import FlashcardsScreen from '../screens/main/FlashcardsScreen';
 
 export type MainStackParamList = {
     MainTabs: undefined;
     LessonSession: { lessonId: string; title: string };
     EditProfile: undefined;
     Settings: undefined;
+    Flashcards: undefined;
 };
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -31,6 +33,11 @@ export default function MainStack() {
             <Stack.Screen
                 name="Settings"
                 component={SettingsScreen}
+                options={{ presentation: 'modal' }}
+            />
+            <Stack.Screen
+                name="Flashcards"
+                component={FlashcardsScreen}
                 options={{ presentation: 'modal' }}
             />
         </Stack.Navigator>

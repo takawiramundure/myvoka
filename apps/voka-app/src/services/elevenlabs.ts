@@ -1,5 +1,5 @@
 import { Audio } from 'expo-av';
-import * as FS from 'expo-file-system';
+import * as FS from 'expo-file-system/legacy';
 import { useConversationStore } from '../stores/useConversationStore';
 
 // In a real production app, API calls should go through a Firebase Cloud Function

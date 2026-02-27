@@ -17,6 +17,14 @@ interface Message {
     corrections?: Correction[];
 }
 
+export interface PracticeSession {
+    id: string;
+    title: string;
+    type: 'Flashcards' | 'Conversation' | 'Drill';
+    durationMin: number;
+    date: Date;
+}
+
 interface ConversationState {
     isRecording: boolean;
     isTutorSpeaking: boolean;
@@ -39,6 +47,11 @@ interface ConversationState {
     hearts: number;
     gems: number;
     levelProgress: number; // 0 to 100
+    practiceGoal: number;
+    flashcardsCompleted: number;
+
+    // History Tracking
+    recentSessions: PracticeSession[];
 
     setRecording: (status: boolean) => void;
     setTutorSpeaking: (status: boolean) => void;
@@ -56,6 +69,9 @@ interface ConversationState {
     refillHearts: () => void;
     addGems: (amount: number) => void;
     updateLevelProgress: (progress: number) => void;
+    setPracticeGoal: (goal: number) => void;
+    incrementFlashcardsCompleted: () => void;
+    addRecentSession: (session: Omit<PracticeSession, 'id' | 'date'>) => void;
 
     clearSession: () => void;
 }
@@ -76,12 +92,15 @@ export const useConversationStore = create<ConversationState>((set) => ({
     lastLesson: 'Greetings and Introductions',
     quizQuestionIndex: 0,
 
-    // Default gamification values
-    xp: 120,
-    streak: 4,
+    // Default gamification values (Starting Fresh)
+    xp: 0,
+    streak: 0,
     hearts: 5,
-    gems: 850,
-    levelProgress: 45,
+    gems: 0,
+    levelProgress: 0,
+    practiceGoal: 20, // Default to 20 mins
+    flashcardsCompleted: 0,
+    recentSessions: [], // Setup empty array
 
     setRecording: (status) => set({ isRecording: status }),
     setTutorSpeaking: (status) => set({ isTutorSpeaking: status }),
@@ -99,6 +118,18 @@ export const useConversationStore = create<ConversationState>((set) => ({
     refillHearts: () => set({ hearts: 5 }),
     addGems: (amount) => set((state) => ({ gems: state.gems + amount })),
     updateLevelProgress: (progress) => set({ levelProgress: progress }),
+    setPracticeGoal: (goal) => set({ practiceGoal: goal }),
+    incrementFlashcardsCompleted: () => set((state) => ({ flashcardsCompleted: state.flashcardsCompleted + 1 })),
+    addRecentSession: (session) => set((state) => {
+        const newSession: PracticeSession = {
+            ...session,
+            id: Math.random().toString(36).substring(2, 9),
+            date: new Date()
+        };
+        // Keep only the most recent 10 sessions, latest first
+        const maxSessions = [newSession, ...state.recentSessions].slice(0, 10);
+        return { recentSessions: maxSessions };
+    }),
 
     clearSession: () => set({
         messages: [],

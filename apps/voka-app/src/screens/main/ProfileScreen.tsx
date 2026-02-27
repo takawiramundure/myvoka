@@ -13,7 +13,7 @@ export default function ProfileScreen() {
     const navigation = useNavigation<any>();
 
     // Using our gamification state for the stats overview
-    const { xp, streak } = useConversationStore();
+    const { xp, streak, practiceGoal, setPracticeGoal } = useConversationStore();
 
     const joinedDate = user?.metadata.creationTime
         ? new Date(user.metadata.creationTime).getFullYear()
@@ -136,6 +136,31 @@ export default function ProfileScreen() {
                             </View>
                         </View>
 
+                    </View>
+                </View>
+
+                {/* --- Practice Goal Row --- */}
+                <View className="px-6 mb-8">
+                    <Text className="text-text-secondary font-poppins font-bold text-sm mb-4 tracking-widest uppercase">Daily Practice Goal</Text>
+
+                    <View className="flex-row justify-between">
+                        {[5, 10, 15, 20].map((mins) => {
+                            const isSelected = practiceGoal === mins;
+                            return (
+                                <TouchableOpacity
+                                    key={mins}
+                                    onPress={() => setPracticeGoal(mins)}
+                                    className={`w-[22%] py-3 rounded-xl border-2 items-center justify-center ${isSelected
+                                            ? 'bg-primary/20 border-primary'
+                                            : 'bg-surface border-surface-light'
+                                        }`}
+                                >
+                                    <Text className={`font-poppins font-bold text-lg ${isSelected ? 'text-primary' : 'text-text-primary'
+                                        }`}>{mins}</Text>
+                                    <Text className="text-text-secondary font-inter text-[10px] uppercase mt-1">Min</Text>
+                                </TouchableOpacity>
+                            )
+                        })}
                     </View>
                 </View>
 
