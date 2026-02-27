@@ -34,6 +34,7 @@ export default function LessonSessionScreen() {
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [feedback, setFeedback] = useState<'correct' | null | 'incorrect'>(null);
     const [progress] = useState(new Animated.Value(0));
+    const [correctCount, setCorrectCount] = useState(0);
 
     React.useEffect(() => {
         loadExercises();
@@ -90,6 +91,7 @@ export default function LessonSessionScreen() {
         const answer = currentExercise.type === 'match' ? selectedOptions.join('-') : selectedOptions.join(' ');
         if (normalize(answer) === normalize(currentExercise.target)) {
             setFeedback('correct');
+            setCorrectCount(prev => prev + 1);
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             addXP(10);
 
@@ -140,12 +142,12 @@ export default function LessonSessionScreen() {
                 <View className="flex-row justify-around w-full mb-12">
                     <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-28">
                         <Ionicons name="flash" size={24} color="#E8A020" />
-                        <Text className="text-text-primary font-bold mt-2 text-xl">+30</Text>
+                        <Text className="text-text-primary font-bold mt-2 text-xl">+{correctCount * 10}</Text>
                         <Text className="text-text-secondary text-xs uppercase font-bold">Total XP</Text>
                     </View>
                     <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-28">
                         <Ionicons name="checkmark-circle" size={24} color="#58CC02" />
-                        <Text className="text-text-primary font-bold mt-2 text-xl">100%</Text>
+                        <Text className="text-text-primary font-bold mt-2 text-xl">{sessionExercises.length > 0 ? Math.round((correctCount / sessionExercises.length) * 100) : 0}%</Text>
                         <Text className="text-text-secondary text-xs uppercase font-bold">Accuracy</Text>
                     </View>
                 </View>

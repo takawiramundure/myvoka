@@ -88,8 +88,18 @@ export default function LoginScreen({ navigation }: Props) {
             await signInWithEmailAndPassword(auth, email.trim(), enteredPin);
             // RootNavigator handles redirect
         } catch (error: any) {
-            setPinError('Incorrect passcode. Try again.');
+            console.error("Login Error:", error);
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                setPinError('Incorrect email or passcode. Try again.');
+            } else {
+                setPinError(error.message || 'Login failed.');
+            }
             setPin('');
+            // Add haptic feedback so the user feels the error
+            if (Platform.OS !== 'web') {
+                const Haptics = require('expo-haptics');
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => { });
+            }
         } finally {
             setLoading(false);
         }
