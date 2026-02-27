@@ -3,11 +3,13 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import MainTabNavigator from './MainTabNavigator';
 import LessonSessionScreen from '../screens/main/LessonSessionScreen';
 import EditProfileScreen from '../screens/main/EditProfileScreen';
+import SettingsScreen from '../screens/main/SettingsScreen';
 
 export type MainStackParamList = {
     MainTabs: undefined;
     LessonSession: { lessonId: string; title: string };
     EditProfile: undefined;
+    Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
@@ -24,6 +26,11 @@ export default function MainStack() {
             <Stack.Screen
                 name="EditProfile"
                 component={EditProfileScreen}
+                options={{ presentation: 'modal' }}
+            />
+            <Stack.Screen
+                name="Settings"
+                component={SettingsScreen}
                 options={{ presentation: 'modal' }}
             />
         </Stack.Navigator>

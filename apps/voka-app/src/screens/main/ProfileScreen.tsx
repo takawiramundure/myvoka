@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/useAuthStore';
@@ -7,124 +7,133 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainStackParamList } from '../../navigation/MainStack';
 import { useConversationStore } from '../../stores/useConversationStore';
-import clsx from 'clsx';
-
-const AVAILABLE_TUTORS = [
-    { id: 'eOHsvebhdtt0XFeHVMQY', name: 'Mfolie', description: 'Female • Default' },
-    { id: 'pNInz6obbf5AWBMyFmTF', name: 'Ekpenyong', description: 'Male' },
-    { id: 'XB0fDUnXU5yW1QnLh1YJ', name: 'Imaobong', description: 'Female' },
-];
 
 export default function ProfileScreen() {
-    const { user, signOut } = useAuthStore();
+    const { user } = useAuthStore();
     const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
-    const { tutorVoiceId, setTutorVoiceId } = useConversationStore();
+
+    // Using our gamification state for the stats overview
+    const { xp, streak } = useConversationStore();
 
     const joinedDate = user?.metadata.creationTime
-        ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-        : 'Unknown';
+        ? new Date(user.metadata.creationTime).getFullYear()
+        : '2024';
+
+    const dummyUsername = user?.displayName ? user.displayName.replace(/\s+/g, '').toUpperCase() : 'LEARNER';
 
     return (
-        <SafeAreaView className="flex-1 bg-background pt-4">
+        <View className="flex-1 bg-background">
 
-            <View className="px-6 mb-6 flex-row items-center justify-between">
-                <Text className="text-text-primary text-3xl font-nunito font-bold">Profile</Text>
-                <TouchableOpacity className="p-2">
-                    <Ionicons name="settings-outline" size={24} color="#8B949E" />
-                </TouchableOpacity>
-            </View>
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false}>
 
-            <ScrollView className="flex-1 px-6" showsVerticalScrollIndicator={false}>
-
-                {/* Profile Header */}
-                <View className="items-center mb-10">
-                    <View className="w-24 h-24 rounded-full bg-surface items-center justify-center border-2 border-primary/20 mb-4 overflow-hidden">
-                        <Ionicons name="person" size={40} color="#8B949E" />
+                {/* --- Blue Header Section --- */}
+                {/* Notice pb-20 to give room for the intersecting avatar */}
+                <View className="bg-[#1CB0F6] pt-16 px-6 pb-20 rounded-b-3xl relative z-10">
+                    <View className="flex-row items-center justify-between mb-4">
+                        <Text className="text-white text-2xl font-nunito font-bold">
+                            {user?.displayName || 'Learner'}
+                        </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Settings')} className="p-2 -mr-2">
+                            <Ionicons name="settings-outline" size={24} color="#FFF" />
+                        </TouchableOpacity>
                     </View>
-                    <Text className="text-text-primary text-xl font-poppins font-semibold">
-                        {user?.displayName || 'Learner'}
+                </View>
+
+                {/* --- Avatar & Handle Info --- */}
+                {/* -mt-16 to pull it up over the blue header */}
+                <View className="items-center z-20 -mt-16">
+                    <View className="w-32 h-32 rounded-full bg-surface items-center justify-center border-4 border-background overflow-hidden relative shadow-sm">
+                        {/* Placeholder for real avatar, using an icon for now */}
+                        <Ionicons name="person" size={50} color="#8B949E" />
+                    </View>
+
+                    <Text className="text-text-secondary font-poppins font-semibold text-sm mt-4 tracking-wider">
+                        @{dummyUsername} • JOINED {joinedDate}
                     </Text>
-                    <Text className="text-text-secondary font-inter">Joined {joinedDate}</Text>
                 </View>
 
-                {/* Settings Links */}
-                <View className="bg-surface border border-surface-light rounded-2xl mb-6 overflow-hidden">
-
-                    <TouchableOpacity
-                        className="flex-row items-center justify-between p-4 border-b border-surface-light"
-                        onPress={() => navigation.navigate('EditProfile')}
-                    >
-                        <View className="flex-row items-center">
-                            <Ionicons name="person-outline" size={20} color="#E8A020" />
-                            <Text className="text-text-primary font-inter ml-3">Edit Profile</Text>
+                {/* --- Social Stats Row (Courses, Following, Followers) --- */}
+                <View className="flex-row justify-between px-10 mt-8 mb-6">
+                    <View className="items-center">
+                        <View className="flex-row gap-1 mb-1">
+                            {/* Mock Course Flags */}
+                            <Text className="text-xl">🇳🇬</Text>
+                            <Text className="text-xl">🇬🇭</Text>
                         </View>
-                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
-                    </TouchableOpacity>
+                        <Text className="text-text-secondary font-inter text-xs font-semibold">Courses</Text>
+                    </View>
 
-                    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-surface-light">
-                        <View className="flex-row items-center">
-                            <Ionicons name="notifications-outline" size={20} color="#E8A020" />
-                            <Text className="text-text-primary font-inter ml-3">Notifications</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
-                    </TouchableOpacity>
+                    <View className="items-center">
+                        <Text className="text-text-primary font-poppins font-bold text-lg leading-tight">2</Text>
+                        <Text className="text-text-secondary font-inter text-xs font-semibold">Following</Text>
+                    </View>
 
-                    <TouchableOpacity className="flex-row items-center justify-between p-4">
-                        <View className="flex-row items-center">
-                            <Ionicons name="lock-closed-outline" size={20} color="#E8A020" />
-                            <Text className="text-text-primary font-inter ml-3">Privacy & Security</Text>
-                        </View>
-                        <Ionicons name="chevron-forward" size={18} color="#8B949E" />
-                    </TouchableOpacity>
-
-                </View>
-
-                {/* Voice Settings */}
-                <Text className="text-text-primary font-poppins font-semibold text-lg mb-4">Voice Settings</Text>
-                <View className="bg-surface border border-surface-light rounded-2xl mb-6 overflow-hidden p-4">
-                    <Text className="text-text-secondary font-inter text-sm mb-4">Select your preferred tutor voice for pronunciations.</Text>
-
-                    <View className="gap-3">
-                        {AVAILABLE_TUTORS.map((tutor) => {
-                            const isSelected = tutorVoiceId === tutor.id;
-                            return (
-                                <TouchableOpacity
-                                    key={tutor.id}
-                                    onPress={() => setTutorVoiceId(tutor.id)}
-                                    className={clsx(
-                                        "flex-row items-center justify-between p-4 rounded-xl border",
-                                        isSelected ? "border-primary bg-primary/10" : "border-surface-light bg-background"
-                                    )}
-                                >
-                                    <View>
-                                        <Text className={clsx("font-poppins font-semibold text-base", isSelected ? "text-primary" : "text-text-primary")}>
-                                            {tutor.name}
-                                        </Text>
-                                        <Text className={clsx("font-inter text-sm", isSelected ? "text-primary/70" : "text-text-secondary")}>
-                                            {tutor.description}
-                                        </Text>
-                                    </View>
-
-                                    {isSelected && (
-                                        <Ionicons name="checkmark-circle" size={24} color="#1A6B4A" />
-                                    )}
-                                </TouchableOpacity>
-                            );
-                        })}
+                    <View className="items-center">
+                        <Text className="text-text-primary font-poppins font-bold text-lg leading-tight">4</Text>
+                        <Text className="text-text-secondary font-inter text-xs font-semibold">Followers</Text>
                     </View>
                 </View>
 
-                {/* Log Out Button */}
-                <TouchableOpacity
-                    onPress={signOut}
-                    className="flex-row items-center justify-center p-4 rounded-xl bg-error/10 mb-8"
-                >
-                    <Ionicons name="log-out-outline" size={20} color="#d32f2f" />
-                    <Text className="text-error font-poppins font-semibold ml-2 text-base">Log Out</Text>
-                </TouchableOpacity>
+                {/* --- Buttons Row --- */}
+                <View className="px-6 flex-row gap-3 mt-2 mb-8 items-center">
+                    <TouchableOpacity className="flex-1 bg-surface border-2 border-surface-light py-3 rounded-2xl items-center flex-row justify-center shadow-sm">
+                        <Ionicons name="person-add" size={18} color="#1A6B4A" />
+                        <Text className="text-primary font-poppins font-bold ml-2 tracking-wide uppercase">Add Friends</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity className="w-14 h-14 bg-surface border-2 border-surface-light rounded-2xl items-center justify-center shadow-sm">
+                        <Ionicons name="qr-code-outline" size={22} color="#1A6B4A" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* --- gamification Overview --- */}
+                <View className="px-6 mb-8">
+                    <Text className="text-text-secondary font-poppins font-bold text-sm mb-4 tracking-widest uppercase">Overview</Text>
+
+                    <View className="flex-row flex-wrap justify-between gap-y-4">
+
+                        {/* Streak Stat */}
+                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                            <Ionicons name="flame" size={24} color="#FF9600" />
+                            <View className="ml-3">
+                                <Text className="text-text-primary font-poppins font-bold text-lg">{streak}</Text>
+                                <Text className="text-text-secondary font-inter text-xs font-semibold">Day Streak</Text>
+                            </View>
+                        </View>
+
+                        {/* Courses Stat */}
+                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                            <Text className="text-2xl">🇳🇬</Text>
+                            <View className="ml-3">
+                                <Text className="text-text-primary font-poppins font-bold text-lg">5</Text>
+                                <Text className="text-text-secondary font-inter text-xs font-semibold">Lessons</Text>
+                            </View>
+                        </View>
+
+                        {/* League Stat */}
+                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                            <Ionicons name="trophy" size={24} color="#CE82FF" />
+                            <View className="ml-3">
+                                <Text className="text-text-primary font-poppins font-bold text-lg">Bronze</Text>
+                                <Text className="text-text-secondary font-inter text-xs font-semibold">League</Text>
+                            </View>
+                        </View>
+
+                        {/* Total XP Stat */}
+                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                            <Ionicons name="flash" size={24} color="#FFD900" />
+                            <View className="ml-3">
+                                <Text className="text-text-primary font-poppins font-bold text-lg">{xp}</Text>
+                                <Text className="text-text-secondary font-inter text-xs font-semibold">Total XP</Text>
+                            </View>
+                        </View>
+
+                    </View>
+                </View>
+
+                <View className="h-10" />
 
             </ScrollView>
-
-        </SafeAreaView>
+        </View>
     );
 }
