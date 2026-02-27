@@ -111,6 +111,17 @@ export default function LessonSessionScreen() {
     const handleSubmit = () => {
         const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
 
+        if (currentExercise.type === 'speak') {
+            // For now, simulate correct pronunciation automatically
+            setFeedback('correct');
+            setCorrectCount(prev => prev + 1);
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            addXP(10);
+            const nextProgress = (currentIndex + 1) / sessionExercises.length;
+            Animated.timing(progress, { toValue: nextProgress, duration: 500, useNativeDriver: false }).start();
+            return;
+        }
+
         const answer = currentExercise.type === 'match' ? selectedOptions.join('-') : selectedOptions.join(' ');
         if (normalize(answer) === normalize(currentExercise.target)) {
             setFeedback('correct');
@@ -353,14 +364,19 @@ export default function LessonSessionScreen() {
                     ))}
 
                     {currentExercise.type === 'speak' && (
-                        <View className="w-full items-center mt-12">
-                            <Ionicons name="mic-circle" size={100} color="#1A6B4A" />
-                            <Text className="text-text-secondary mt-4">Hold to record your pronunciation</Text>
+                        <View className="w-full items-center justify-center flex-1">
+                            <TouchableOpacity
+                                onPress={handleSubmit}
+                                className="items-center"
+                            >
+                                <Ionicons name="mic-circle" size={140} color="#1A6B4A" />
+                                <Text className="text-text-secondary mt-6 text-lg font-nunito">Tap to simulate voice</Text>
+                            </TouchableOpacity>
                         </View>
                     )}
 
                     {currentExercise.type === 'match' && (
-                        <Animated.View style={{ transform: [{ translateX: shakeAnim }], flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%' }}>
+                        <Animated.View style={{ transform: [{ translateX: shakeAnim }], flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%', flex: 1, paddingBottom: 20 }}>
                             {matchCards.map((card) => {
                                 const isMatched = matchedPairs.includes(card.pairId);
                                 const isSelected = selectedMatch?.id === card.id;
@@ -370,14 +386,14 @@ export default function LessonSessionScreen() {
                                         key={card.id}
                                         disabled={isMatched}
                                         onPress={() => handleMatchSelection(card)}
-                                        className={`w-[48%] p-4 rounded-xl mb-4 border-b-4 items-center justify-center min-h-[70px] ${isMatched
+                                        className={`w-[48%] rounded-2xl mb-4 border-b-4 items-center justify-center min-h-[90px] ${isMatched
                                             ? 'bg-surface-light border-transparent opacity-0 shadow-none' // Hide matched
                                             : isSelected
                                                 ? 'bg-primary/20 border-primary shadow-sm' // Highlight selected
                                                 : 'bg-surface border-surface-light shadow-sm' // Default
                                             }`}
                                     >
-                                        <Text className={`text-base font-bold text-center ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                                        <Text className={`text-xl font-bold text-center px-2 ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
                                             {card.text}
                                         </Text>
                                     </TouchableOpacity>
