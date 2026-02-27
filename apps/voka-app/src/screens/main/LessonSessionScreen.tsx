@@ -36,6 +36,29 @@ export default function LessonSessionScreen() {
     const [progress] = useState(new Animated.Value(0));
     const [correctCount, setCorrectCount] = useState(0);
 
+    // Match exercise state
+    const [matchCards, setMatchCards] = useState<{ id: string, text: string, type: 'source' | 'target', pairId: number }[]>([]);
+    const [selectedMatch, setSelectedMatch] = useState<{ id: string, text: string, type: 'source' | 'target', pairId: number } | null>(null);
+    const [matchedPairs, setMatchedPairs] = useState<number[]>([]);
+    const [shakeAnim] = useState(new Animated.Value(0));
+
+    // Reset Match game on new exercise
+    React.useEffect(() => {
+        if (sessionExercises.length > 0 && sessionExercises[currentIndex]?.type === 'match') {
+            const exercise = sessionExercises[currentIndex];
+            if (exercise.pairs) {
+                const cards: any[] = [];
+                exercise.pairs.forEach(p => {
+                    cards.push({ id: `s-${p.id}`, text: p.source, type: 'source', pairId: p.id });
+                    cards.push({ id: `t-${p.id}`, text: p.target, type: 'target', pairId: p.id });
+                });
+                setMatchCards(cards.sort(() => 0.5 - Math.random()));
+                setMatchedPairs([]);
+                setSelectedMatch(null);
+            }
+        }
+    }, [currentIndex, sessionExercises]);
+
     React.useEffect(() => {
         loadExercises();
     }, [selectedLanguage, lessonId]);
@@ -134,28 +157,6 @@ export default function LessonSessionScreen() {
         pairs?: MatchPair[];
     }
 
-    // Match exercise state
-    const [matchCards, setMatchCards] = useState<{ id: string, text: string, type: 'source' | 'target', pairId: number }[]>([]);
-    const [selectedMatch, setSelectedMatch] = useState<{ id: string, text: string, type: 'source' | 'target', pairId: number } | null>(null);
-    const [matchedPairs, setMatchedPairs] = useState<number[]>([]);
-    const [shakeAnim] = useState(new Animated.Value(0));
-
-    // Reset Match game on new exercise
-    React.useEffect(() => {
-        if (sessionExercises.length > 0 && sessionExercises[currentIndex].type === 'match') {
-            const exercise = sessionExercises[currentIndex];
-            if (exercise.pairs) {
-                const cards: any[] = [];
-                exercise.pairs.forEach(p => {
-                    cards.push({ id: `s-${p.id}`, text: p.source, type: 'source', pairId: p.id });
-                    cards.push({ id: `t-${p.id}`, text: p.target, type: 'target', pairId: p.id });
-                });
-                setMatchCards(cards.sort(() => 0.5 - Math.random()));
-                setMatchedPairs([]);
-                setSelectedMatch(null);
-            }
-        }
-    }, [currentIndex, sessionExercises]);
 
     const handleMatchSelection = (card: typeof matchCards[0]) => {
         // Can't select already matched cards
