@@ -7,7 +7,8 @@ import { useConversationStore } from '../../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
 import { playElevenLabsAudio } from '../../services/elevenlabs';
 import { db } from '../../services/firebase';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, doc, setDoc, arrayUnion } from 'firebase/firestore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 interface Exercise {
     id: string;
@@ -26,6 +27,7 @@ export default function LessonSessionScreen() {
     const route = useRoute<any>();
     const { lessonId } = route.params || { lessonId: '1' };
     const { addXP, decrementHeart, hearts, selectedLanguage } = useConversationStore();
+    const { user } = useAuthStore();
 
     const [sessionExercises, setSessionExercises] = useState<Exercise[]>([]);
     const [loading, setLoading] = useState(true);
@@ -142,13 +144,28 @@ export default function LessonSessionScreen() {
         }
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (currentIndex < sessionExercises.length - 1) {
             setFeedback(null);
             setSelectedOptions([]);
             setCurrentIndex(currentIndex + 1);
         } else {
+            // Lesson is completely finished!
             setIsFinished(true);
+
+            // Mark the unit as completed in Firestore
+            if (user?.uid) {
+                try {
+                    const unitKey = `unit_${lessonId}`;
+                    await setDoc(doc(db, 'users', user.uid), {
+                        completedUnits: {
+                            [selectedLanguage]: arrayUnion(unitKey)
+                        }
+                    }, { merge: true });
+                } catch (err) {
+                    console.error("Failed to save progress", err);
+                }
+            }
         }
     };
 
