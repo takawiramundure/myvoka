@@ -93,60 +93,70 @@ export default function LearnScreen() {
             );
         }
 
-        const rows: { units: Unit[], type: 'single' | 'double' }[] = [];
+        const rows: { units: Unit[], type: 'single' | 'double', offset: number }[] = [];
         let i = 0;
+        let pIndex = 0;
+        // The hopscotch pattern based on the image: 1, 1, 2, 1, 2...
+        const pattern = [1, 1, 2, 1, 2];
+        let offsetIndex = 0;
+
         while (i < units.length) {
-            if (i % 3 === 0) {
-                rows.push({ units: [units[i]], type: 'single' });
+            const count = pattern[pIndex % pattern.length];
+            if (count === 1) {
+                // Alternate offsets for single blocks so they aren't linear
+                const offsets = [0, -30, 20, -15, 30];
+                const offset = offsets[offsetIndex % offsets.length];
+                rows.push({ units: [units[i]], type: 'single', offset });
                 i += 1;
+                offsetIndex++;
             } else {
                 const row = [units[i]];
                 if (i + 1 < units.length) {
                     row.push(units[i + 1]);
                 }
-                rows.push({ units: row, type: 'double' });
+                rows.push({ units: row, type: 'double', offset: 0 });
                 i += 2;
             }
+            pIndex++;
         }
 
         return (
-            <View className="w-full px-4 items-center pb-10 pt-4">
+            <View className="w-full px-4 items-center pb-20 pt-4">
                 {rows.map((row, rowIndex) => (
-                    <View key={rowIndex} className={`flex-row justify-center items-start w-full mb-6 ${row.type === 'double' ? 'space-x-6' : ''}`}>
+                    <View key={rowIndex} className={`flex-row justify-center items-start w-full mb-6 ${row.type === 'double' ? 'space-x-6' : ''}`} style={{ transform: [{ translateX: row.offset }] }}>
                         {row.units.map((unit) => {
                             const index = units.findIndex(u => u.id === unit.id);
+                            const unitNumber = index + 1;
                             const isCompleted = completedUnits.includes(unit.id);
                             const isUnlocked = isCompleted || (index === 0 || completedUnits.includes(units[index - 1].id));
                             const status = isCompleted ? 'completed' : isUnlocked ? 'unlocked' : 'locked';
 
                             const nodeBg = status === 'completed'
-                                ? 'bg-surface-light border-2 border-surface opacity-60'
+                                ? 'bg-surface-light border-4 border-surface opacity-50'
                                 : status === 'unlocked'
-                                    ? 'bg-primary border-2 border-[#58CC02]'
-                                    : 'bg-surface border-2 border-surface-light opacity-50';
+                                    ? 'bg-primary border-4 border-[#D7FFB8]'
+                                    : 'bg-background border-4 border-dashed border-surface-light opacity-70';
 
                             return (
-                                <View key={unit.id} className="items-center relative mx-2">
+                                <View key={unit.id} className="items-center relative mx-1">
                                     {status === 'unlocked' && (
                                         <View className="bg-background px-3 py-1 rounded-full mb-2 shadow-sm border border-primary absolute -top-8 z-20">
-                                            <Text className="text-primary font-poppins font-bold uppercase tracking-widest text-[9px]">Start</Text>
+                                            <Text className="text-primary font-poppins font-bold uppercase tracking-widest text-[9px]">Play</Text>
                                         </View>
                                     )}
 
                                     <TouchableOpacity
                                         onPress={() => handleNodePress(unit, status)}
                                         disabled={status === 'locked'}
-                                        className={`w-28 h-28 rounded-3xl items-center justify-center shadow-lg ${nodeBg}`}
+                                        className={`w-24 h-24 rounded-2xl items-center justify-center shadow-lg ${nodeBg}`}
                                     >
-                                        <Ionicons
-                                            name={status === 'completed' ? 'checkmark' : status === 'locked' ? 'lock-closed' : 'book'}
-                                            size={42}
-                                            color={status === 'locked' ? '#8B949E' : 'white'}
-                                        />
+                                        <Text className={`font-black text-5xl ${status === 'unlocked' ? 'text-white' : status === 'completed' ? 'text-text-secondary opacity-50' : 'text-surface-light opacity-80'}`}>
+                                            {unitNumber}
+                                        </Text>
 
                                         {status === 'unlocked' && (
                                             <Animated.View
-                                                className="absolute inset-0 border-[5px] border-[#D7FFB8] rounded-3xl opacity-60"
+                                                className="absolute inset-0 border-4 border-[#D7FFB8] rounded-2xl opacity-60"
                                                 style={{ transform: [{ scale: pulseAnim }] }}
                                             />
                                         )}
