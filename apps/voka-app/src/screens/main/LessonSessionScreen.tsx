@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, SafeAreaView, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, SafeAreaView, TouchableOpacity, Animated, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useConversationStore } from '../../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
 import { playElevenLabsAudio } from '../../services/elevenlabs';
+import { db } from '../../services/firebase';
+import { collection, query, getDocs } from 'firebase/firestore';
 
 interface Exercise {
     id: string;
@@ -14,28 +16,18 @@ interface Exercise {
     options?: string[];
 }
 
-const MOCK_EXERCISES: Exercise[] = [
-    { id: '1', type: 'translate', question: 'Amesiere', target: 'Good morning', options: ['Good', 'morning', 'night', 'How', 'are', 'you'] },
-    { id: '2', type: 'translate', question: 'Aba die?', target: 'How are you?', options: ['How', 'are', 'you', 'Good', 'fine', 'I'] },
-    { id: '3', type: 'translate', question: 'Sosongo', target: 'Thank you', options: ['Thank', 'you', 'Welcome', 'Please', 'Yes', 'No'] },
-    { id: '4', type: 'translate', question: 'Esiere', target: 'Good night', options: ['Good', 'night', 'morning', 'Sleep', 'well', 'bye'] },
-    { id: '5', type: 'translate', question: 'Ami mmehë', target: 'I am fine', options: ['I', 'am', 'fine', 'Good', 'not', 'sad'] },
-    { id: '6', type: 'match', question: 'A-me-sie-re', target: 'Good-mor-ning', options: ['A', 'me', 'sie', 're', 'Good', 'mor', 'ning'] },
-    { id: '7', type: 'translate', question: 'Abasi akpeme fi', target: 'God protect you', options: ['God', 'protect', 'you', 'bless', 'save', 'keep'] },
-    { id: '8', type: 'translate', question: 'Mbuot', target: 'Friend', options: ['Friend', 'Family', 'Brother', 'Sister', 'Human', 'Person'] },
-    { id: '9', type: 'translate', question: 'Hello', target: 'Mesiere', options: ['Mesiere', 'Amesiere', 'Esiere', 'Sosongo', 'Mbuot', 'Di do'] },
-    { id: '10', type: 'translate', question: 'Sweet', target: 'Ama nte', options: ['Ama nte', 'Daba daba', 'Sosongo', 'Mbuot', 'Esiere', 'Di do'] },
-    { id: '11', type: 'translate', question: 'Come', target: 'Di do', options: ['Di do', 'Sosongo', 'Aba die', 'Ka do', 'Ami', 'Edi'] },
-    { id: '12', type: 'speak', question: 'Say "Sosongo"', target: 'Sosongo' },
-    { id: '13', type: 'translate', question: 'Ami edi Learner', target: 'I am Learner', options: ['I', 'am', 'Learner', 'He', 'is', 'Teacher'] },
-];
+// Exercises will now be loaded from Firestore
+// const MOCK_EXERCISES: Exercise[] = [...]; 
+
 
 export default function LessonSessionScreen() {
     const navigation = useNavigation();
     const route = useRoute<any>();
-    const { addXP, decrementHeart, hearts } = useConversationStore();
+    const { lessonId } = route.params || { lessonId: '1' };
+    const { addXP, decrementHeart, hearts, selectedLanguage } = useConversationStore();
 
     const [sessionExercises, setSessionExercises] = useState<Exercise[]>([]);
+    const [loading, setLoading] = useState(true);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -43,14 +35,53 @@ export default function LessonSessionScreen() {
     const [progress] = useState(new Animated.Value(0));
 
     React.useEffect(() => {
-        // Randomize and pick 7 exercises for this session
-        const shuffled = [...MOCK_EXERCISES].sort(() => 0.5 - Math.random());
-        setSessionExercises(shuffled.slice(0, 7));
-    }, []);
+        loadExercises();
+    }, [selectedLanguage, lessonId]);
+
+    const loadExercises = async () => {
+        setLoading(true);
+        try {
+            const lang = selectedLanguage.toLowerCase();
+            const exercisesRef = collection(db, 'content', lang, 'units', `unit_${lessonId}`, 'exercises');
+            const snapshot = await getDocs(exercisesRef);
+
+            let exercises = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
+
+            if (exercises.length === 0) {
+                console.warn("No exercises found in Firestore, falling back to empty pool");
+            }
+
+            // Shuffle and pick 7
+            const shuffled = exercises.sort(() => 0.5 - Math.random());
+            setSessionExercises(shuffled.slice(0, 7));
+        } catch (error) {
+            console.error("Error loading exercises:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const currentExercise = sessionExercises[currentIndex];
 
-    if (!currentExercise && !isFinished) return null; // Wait for initialization
+    if (loading) {
+        return (
+            <SafeAreaView className="flex-1 bg-background items-center justify-center">
+                <ActivityIndicator size="large" color="#1A6B4A" />
+                <Text className="text-text-secondary mt-4">Loading lesson...</Text>
+            </SafeAreaView>
+        );
+    }
+
+    if (!currentExercise && !isFinished) {
+        return (
+            <SafeAreaView className="flex-1 bg-background items-center justify-center">
+                <Text className="text-text-primary text-xl">Unit not found.</Text>
+                <TouchableOpacity onPress={() => navigation.goBack()} className="mt-4 bg-primary px-6 py-2 rounded-full">
+                    <Text className="text-white font-bold">Go Back</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
 
     const handleSubmit = () => {
         const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
