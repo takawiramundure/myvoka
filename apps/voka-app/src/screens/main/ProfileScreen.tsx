@@ -10,7 +10,7 @@ import { useConversationStore } from '../../stores/useConversationStore';
 
 export default function ProfileScreen() {
     const { user } = useAuthStore();
-    const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+    const navigation = useNavigation<any>();
 
     // Using our gamification state for the stats overview
     const { xp, streak } = useConversationStore();
@@ -26,16 +26,18 @@ export default function ProfileScreen() {
 
             <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false}>
 
-                {/* --- Blue Header Section --- */}
+                {/* --- Green Header Section --- */}
                 {/* Notice pb-20 to give room for the intersecting avatar */}
-                <View className="bg-[#1CB0F6] pt-16 px-6 pb-20 rounded-b-3xl relative z-10">
-                    <View className="flex-row items-center justify-between mb-4">
-                        <Text className="text-white text-2xl font-nunito font-bold">
-                            {user?.displayName || 'Learner'}
-                        </Text>
+                <View className="bg-primary pt-16 px-6 pb-20 rounded-b-3xl relative z-10">
+                    <View className="items-end mb-2">
                         <TouchableOpacity onPress={() => navigation.navigate('Settings')} className="p-2 -mr-2">
                             <Ionicons name="settings-outline" size={24} color="#FFF" />
                         </TouchableOpacity>
+                    </View>
+                    <View className="items-center justify-center -mt-2">
+                        <Text className="text-white text-3xl font-nunito font-bold text-center">
+                            {user?.displayName || 'Learner'}
+                        </Text>
                     </View>
                 </View>
 
@@ -93,22 +95,28 @@ export default function ProfileScreen() {
                     <View className="flex-row flex-wrap justify-between gap-y-4">
 
                         {/* Streak Stat */}
-                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('Progress')}
+                            className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm"
+                        >
                             <Ionicons name="flame" size={24} color="#FF9600" />
                             <View className="ml-3">
                                 <Text className="text-text-primary font-poppins font-bold text-lg">{streak}</Text>
                                 <Text className="text-text-secondary font-inter text-xs font-semibold">Day Streak</Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
 
                         {/* Courses Stat */}
-                        <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate('Progress')}
+                            className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm"
+                        >
                             <Text className="text-2xl">🇳🇬</Text>
                             <View className="ml-3">
                                 <Text className="text-text-primary font-poppins font-bold text-lg">5</Text>
                                 <Text className="text-text-secondary font-inter text-xs font-semibold">Lessons</Text>
                             </View>
-                        </View>
+                        </TouchableOpacity>
 
                         {/* League Stat */}
                         <View className="w-[48%] bg-surface border-2 border-surface-light rounded-2xl p-4 flex-row items-center shadow-sm">
