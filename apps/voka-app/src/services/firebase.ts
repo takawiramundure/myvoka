@@ -19,5 +19,3 @@ export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 
-// Use emulator only if manually forced or in specific local dev scenarios
-// connectFunctionsEmulator(functions, '192.168.2.188', 5001);
