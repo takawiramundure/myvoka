@@ -3,9 +3,17 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainStackParamList } from '../../navigation/MainStack';
 
 export default function ProfileScreen() {
-    const signOut = useAuthStore((s) => s.signOut);
+    const { user, signOut } = useAuthStore();
+    const navigation = useNavigation<NativeStackNavigationProp<MainStackParamList>>();
+
+    const joinedDate = user?.metadata.creationTime
+        ? new Date(user.metadata.creationTime).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+        : 'Unknown';
 
     return (
         <SafeAreaView className="flex-1 bg-background pt-4">
@@ -24,14 +32,19 @@ export default function ProfileScreen() {
                     <View className="w-24 h-24 rounded-full bg-surface items-center justify-center border-2 border-primary/20 mb-4 overflow-hidden">
                         <Ionicons name="person" size={40} color="#8B949E" />
                     </View>
-                    <Text className="text-text-primary text-xl font-poppins font-semibold">Jane Doe</Text>
-                    <Text className="text-text-secondary font-inter">Joined October 2026</Text>
+                    <Text className="text-text-primary text-xl font-poppins font-semibold">
+                        {user?.displayName || 'Learner'}
+                    </Text>
+                    <Text className="text-text-secondary font-inter">Joined {joinedDate}</Text>
                 </View>
 
                 {/* Settings Links */}
                 <View className="bg-surface border border-surface-light rounded-2xl mb-6 overflow-hidden">
 
-                    <TouchableOpacity className="flex-row items-center justify-between p-4 border-b border-surface-light">
+                    <TouchableOpacity
+                        className="flex-row items-center justify-between p-4 border-b border-surface-light"
+                        onPress={() => navigation.navigate('EditProfile')}
+                    >
                         <View className="flex-row items-center">
                             <Ionicons name="person-outline" size={20} color="#E8A020" />
                             <Text className="text-text-primary font-inter ml-3">Edit Profile</Text>
