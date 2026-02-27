@@ -9,13 +9,15 @@ const API_KEY = process.env.EXPO_PUBLIC_ELEVENLABS_API_KEY || '';
 // ElevenLabs concurrent_limit_exceeded errors and overlapping audio.
 let audioQueue: Promise<void> = Promise.resolve();
 
-export const playElevenLabsAudio = (text: string, voiceId: string = "eOHsvebhdtt0XFeHVMQY"): Promise<void> => {
-    audioQueue = audioQueue.then(() => _playAudio(text, voiceId));
+export const playElevenLabsAudio = (text: string): Promise<void> => {
+    audioQueue = audioQueue.then(() => _playAudio(text));
     return audioQueue;
 };
 
-const _playAudio = async (text: string, voiceId: string): Promise<void> => {
+const _playAudio = async (text: string): Promise<void> => {
     const store = useConversationStore.getState();
+    const voiceId = store.tutorVoiceId || "eOHsvebhdtt0XFeHVMQY"; // default to Mfolie if missing
+
     store.setTutorSpeaking(true);
 
     const safeName = text.replace(/[^a-z0-9]/gi, '_').toLowerCase();

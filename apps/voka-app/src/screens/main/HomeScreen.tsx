@@ -6,10 +6,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import clsx from 'clsx';
 import { useConversationStore } from '../../stores/useConversationStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 export default function HomeScreen() {
     const navigation = useNavigation<any>();
     const { setSelectedLanguage } = useConversationStore();
+    const { user } = useAuthStore();
 
     const featuredLanguage = SUPPORTED_LANGUAGES.find(l => l.featured);
     const otherLanguages = SUPPORTED_LANGUAGES.filter(l => !l.featured);
@@ -72,7 +74,9 @@ export default function HomeScreen() {
                 <View className="flex-row justify-between items-center mb-6">
                     <View>
                         <Text className="text-text-secondary font-inter text-base">Welcome back,</Text>
-                        <Text className="text-text-primary text-3xl font-nunito font-bold">Learner 👋</Text>
+                        <Text className="text-text-primary text-3xl font-nunito font-bold">
+                            {user?.displayName || 'Learner'} 👋
+                        </Text>
                     </View>
                     <TouchableOpacity className="bg-surface-light p-3 rounded-full">
                         <Ionicons name="notifications-outline" size={24} color="#F0F6FC" />

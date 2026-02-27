@@ -23,6 +23,7 @@ interface ConversationState {
     messages: Message[];
     currentTranscript: string;
     selectedLanguage: 'ibibio' | 'yoruba' | 'hausa' | 'igbo';
+    tutorVoiceId: string;
 
     // Interactive Flow State
     sessionPhase: 'greeting' | 'quiz' | 'quiz_eval' | 'learning' | 'conversation';
@@ -44,6 +45,7 @@ interface ConversationState {
     addMessage: (msg: Message) => void;
     setCurrentTranscript: (text: string) => void;
     setSelectedLanguage: (lang: 'ibibio' | 'yoruba' | 'hausa' | 'igbo') => void;
+    setTutorVoiceId: (id: string) => void;
     setSessionPhase: (phase: 'greeting' | 'quiz' | 'quiz_eval' | 'learning' | 'conversation') => void;
     setActiveMode: (mode: 'drill' | 'conversation') => void;
     setQuizQuestionIndex: (index: number) => void;
@@ -64,6 +66,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
     messages: [],
     currentTranscript: '',
     selectedLanguage: 'ibibio',
+    tutorVoiceId: 'eOHsvebhdtt0XFeHVMQY', // Default: Mfolie (existing voice)
 
     // Defaulting to "First Time User" for the mock
     sessionPhase: 'greeting',
@@ -85,6 +88,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
     addMessage: (msg) => set((state) => ({ messages: [...state.messages, msg] })),
     setCurrentTranscript: (text) => set({ currentTranscript: text }),
     setSelectedLanguage: (lang) => set({ selectedLanguage: lang }),
+    setTutorVoiceId: (id) => set({ tutorVoiceId: id }),
     setSessionPhase: (phase) => set({ sessionPhase: phase }),
     setActiveMode: (mode) => set({ activeMode: mode }),
     setQuizQuestionIndex: (index) => set({ quizQuestionIndex: index }),
