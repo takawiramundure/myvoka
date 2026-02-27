@@ -43,7 +43,8 @@
         {
           "microphonePermission": "Allow Voka app to access your microphone for recording audio to the tutor."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }
