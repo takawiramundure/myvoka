@@ -104,8 +104,8 @@ export default function LearnScreen() {
             const pathOffset = Math.sin(index * 1.5) * 60;
 
             // For Biome feel - let's alternate colors every 5 levels if we had them. 
-            // Right now, Unit 1 = Green biome, Unit 2 = Desert/Yellow, etc.
-            const biomeColors = ['#E8F5E9', '#FFF3E0', '#E3F2FD', '#F3E5F5'];
+            // Better contrast tailored for dark mode
+            const biomeColors = ['#152419', '#241D12', '#141D26', '#221825'];
             const biomeBgColor = biomeColors[Math.floor(index / 3) % biomeColors.length];
             const nodeBg = status === 'completed' ? 'bg-[#58CC02]' : status === 'unlocked' ? 'bg-primary' : 'bg-surface-light border-4 border-surface';
 
@@ -174,7 +174,7 @@ export default function LearnScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Map Header */}
-                    <View className="px-6 py-8 items-center bg-[#D7FFB8] rounded-b-[40px] mb-8 shadow-sm">
+                    <View className="px-6 py-8 items-center bg-surface border-b-2 border-surface-light rounded-b-[40px] mb-8 shadow-sm">
                         <Text className="text-primary font-bold opacity-80 text-xs tracking-widest uppercase mb-1">{selectedLanguage} ADVENTURE</Text>
                         <Text className="text-text-primary text-3xl font-poppins font-black text-center">
                             The Explorer's Map
