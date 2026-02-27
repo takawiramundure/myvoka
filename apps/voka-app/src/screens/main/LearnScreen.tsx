@@ -31,7 +31,7 @@ export default function LearnScreen() {
     React.useEffect(() => {
         setActiveMode('drill');
         // Seed content only in dev if needed - temporary
-        // seedIbibioLessons();
+        seedIbibioLessons();
     }, []);
 
     const handleNodePress = (node: PathNode) => {
