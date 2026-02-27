@@ -4,7 +4,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useConversationStore } from '../../stores/useConversationStore';
 import TopStatsBar from '../../components/TopStatsBar';
-import { seedIbibioLessons } from '../../services/seedData';
 
 interface PathNode {
     id: string;
@@ -30,8 +29,6 @@ export default function LearnScreen() {
 
     React.useEffect(() => {
         setActiveMode('drill');
-        // Seed content only in dev if needed - temporary
-        seedIbibioLessons();
     }, []);
 
     const handleNodePress = (node: PathNode) => {
