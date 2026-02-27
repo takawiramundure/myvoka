@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useConversationStore } from '../../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
-import { playElevenLabsAudio } from '../../services/elevenlabs';
+import { playElevenLabsAudio, prefetchElevenLabsAudio } from '../../services/elevenlabs';
 import { db } from '../../services/firebase';
 import { collection, query, getDocs, doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { useAuthStore } from '../../stores/useAuthStore';
@@ -53,10 +53,19 @@ export default function LessonSessionScreen() {
                 exercise.pairs.forEach(p => {
                     cards.push({ id: `s-${p.id}`, text: p.source, type: 'source', pairId: p.id });
                     cards.push({ id: `t-${p.id}`, text: p.target, type: 'target', pairId: p.id });
+                    prefetchElevenLabsAudio(p.target); // Background fetch the translation target
                 });
                 setMatchCards(cards.sort(() => 0.5 - Math.random()));
                 setMatchedPairs([]);
                 setSelectedMatch(null);
+            }
+        } else if (sessionExercises.length > 0 && sessionExercises[currentIndex]) {
+            const exercise = sessionExercises[currentIndex];
+            if (exercise.options) {
+                exercise.options.forEach(opt => prefetchElevenLabsAudio(opt));
+            }
+            if (exercise.type !== 'match') {
+                prefetchElevenLabsAudio(exercise.question);
             }
         }
     }, [currentIndex, sessionExercises]);
@@ -111,7 +120,7 @@ export default function LessonSessionScreen() {
     }
 
     const handleSubmit = () => {
-        const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "").trim();
+        const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!?$%^&*;:{}=\-_`~()]/g, "").trim();
 
         if (currentExercise.type === 'speak') {
             // For now, simulate correct pronunciation automatically
