@@ -231,212 +231,212 @@ export default function LessonSessionScreen() {
         }
     };
 
-    if (isFinished) {
-        const accuracy = sessionExercises.length > 0 ? Math.round((correctCount / sessionExercises.length) * 100) : 0;
+    const accuracy = sessionExercises.length > 0 ? Math.round((correctCount / sessionExercises.length) * 100) : 0;
 
-        let theme = {
-            trophy: '🏆',
-            color: '#E8A020',
-            bg: 'bg-[#FFD700]/10',
-            message: "Lesson Complete!",
-            subtext: "Perfect! You're brilliant.",
-            btnColor: 'bg-[#E8A020]'
-        };
+    let theme = {
+        trophy: '🏆',
+        color: '#E8A020',
+        bg: 'bg-[#FFD700]/10',
+        message: "Lesson Complete!",
+        subtext: "Perfect! You're brilliant.",
+        btnColor: 'bg-[#E8A020]'
+    };
 
-        if (accuracy === 100) {
-            theme = { trophy: '🏆', color: '#E8A020', bg: 'bg-[#FFD700]/10', message: "Lesson Complete!", subtext: "Perfect! You're brilliant.", btnColor: 'bg-[#E8A020]' };
-        } else if (accuracy >= 80) {
-            theme = { trophy: '🥈', color: '#C0C0C0', bg: 'bg-[#C0C0C0]/10', message: "Great Job!", subtext: "Almost perfect. Keep it up!", btnColor: 'bg-[#A0A0A0]' };
-        } else if (accuracy >= 50) {
-            theme = { trophy: '🥉', color: '#CD7F32', bg: 'bg-[#CD7F32]/10', message: "Good Effort", subtext: "Practice makes perfect.", btnColor: 'bg-[#CD7F32]' };
-        } else {
-            theme = { trophy: '🦉', color: '#FF4B4B', bg: 'bg-[#FF4B4B]/10', message: "Don't Give Up!", subtext: "Let's review these again soon.", btnColor: 'bg-[#FF4B4B]' };
-        }
-
-        return (
-            <SafeAreaView className={`flex-1 items-center justify-center px-6 ${theme.bg}`}>
-                <View className="items-center mb-8">
-                    <Text className="text-8xl mb-4">{theme.trophy}</Text>
-                    <Text className="text-text-primary text-4xl font-nunito font-bold mb-2 text-center">{theme.message}</Text>
-                    <Text className="text-text-secondary text-lg text-center px-4 font-inter">
-                        {theme.subtext}
-                    </Text>
-                </View>
-
-                <View className="flex-row justify-around w-full mb-12">
-                    <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-32 shadow-sm">
-                        <Ionicons name="flash" size={28} color="#E8A020" />
-                        <Text className="text-text-primary font-bold mt-2 text-2xl">+{correctCount * 10}</Text>
-                        <Text className="text-text-secondary text-xs uppercase font-bold tracking-wider mt-1">Total XP</Text>
-                    </View>
-                    <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-32 shadow-sm">
-                        <Ionicons name="checkmark-circle" size={28} color={accuracy >= 80 ? "#58CC02" : theme.color} />
-                        <Text className="text-text-primary font-bold mt-2 text-2xl">{accuracy}%</Text>
-                        <Text className="text-text-secondary text-xs uppercase font-bold tracking-wider mt-1">Accuracy</Text>
-                    </View>
-                </View>
-
-                <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    className={`w-full py-4 rounded-2xl items-center shadow-lg ${theme.btnColor}`}
-                >
-                    <Text className="text-white font-black text-lg uppercase tracking-widest font-poppins">CONTINUE</Text>
-                </TouchableOpacity>
-            </SafeAreaView>
-        );
+    if (accuracy === 100) {
+        theme = { trophy: '🏆', color: '#E8A020', bg: 'bg-[#FFD700]/10', message: "Lesson Complete!", subtext: "Perfect! You're brilliant.", btnColor: 'bg-[#E8A020]' };
+    } else if (accuracy >= 80) {
+        theme = { trophy: '🥈', color: '#C0C0C0', bg: 'bg-[#C0C0C0]/10', message: "Great Job!", subtext: "Almost perfect. Keep it up!", btnColor: 'bg-[#A0A0A0]' };
+    } else if (accuracy >= 50) {
+        theme = { trophy: '🥉', color: '#CD7F32', bg: 'bg-[#CD7F32]/10', message: "Good Effort", subtext: "Practice makes perfect.", btnColor: 'bg-[#CD7F32]' };
+    } else {
+        theme = { trophy: '🦉', color: '#FF4B4B', bg: 'bg-[#FF4B4B]/10', message: "Don't Give Up!", subtext: "Let's review these again soon.", btnColor: 'bg-[#FF4B4B]' };
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-background">
-            {/* Header / Progress bar */}
-            <View className="flex-row items-center px-6 pt-4 mb-10">
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Ionicons name="close" size={28} color="#8B949E" />
-                </TouchableOpacity>
-                <View className="flex-1 h-4 bg-surface-light rounded-full mx-4 overflow-hidden">
-                    <Animated.View
-                        style={{
-                            height: '100%',
-                            backgroundColor: '#58CC02',
-                            width: progress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ['0%', '100%']
-                            })
-                        }}
-                    />
-                </View>
-                <View className="flex-row items-center">
-                    <Ionicons name="heart" size={24} color="#FF4B4B" />
-                    <Text className="text-text-primary font-bold ml-1">{hearts}</Text>
-                </View>
-            </View>
+        <SafeAreaView className={isFinished ? `flex-1 items-center justify-center px-6 ${theme.bg}` : "flex-1 bg-background"}>
+            {isFinished ? (
+                <>
+                    <View className="items-center mb-8">
+                        <Text className="text-8xl mb-4">{theme.trophy}</Text>
+                        <Text className="text-text-primary text-4xl font-nunito font-bold mb-2 text-center">{theme.message}</Text>
+                        <Text className="text-text-secondary text-lg text-center px-4 font-inter">
+                            {theme.subtext}
+                        </Text>
+                    </View>
 
-            {/* Exercise Content */}
-            <View className="px-6 flex-1">
-                <Text className="text-text-primary text-2xl font-nunito font-bold mb-8">
-                    {currentExercise.question}
-                </Text>
-
-                {currentExercise.type !== 'match' && (
-                    <View className="flex-row items-start mb-12">
-                        <View className="w-20 h-20 bg-primary/20 rounded-2xl items-center justify-center mr-4">
-                            <Text className="text-4xl text-white">🦉</Text>
+                    <View className="flex-row justify-around w-full mb-12">
+                        <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-32 shadow-sm">
+                            <Ionicons name="flash" size={28} color="#E8A020" />
+                            <Text className="text-text-primary font-bold mt-2 text-2xl">+{correctCount * 10}</Text>
+                            <Text className="text-text-secondary text-xs uppercase font-bold tracking-wider mt-1">Total XP</Text>
                         </View>
-                        <View className="bg-surface border border-surface-light p-4 rounded-2xl flex-1 flex-row items-center justify-between">
-                            <Text className="text-text-primary text-lg flex-1">{currentExercise.question}</Text>
-                            <TouchableOpacity
-                                onPress={() => playElevenLabsAudio(currentExercise.question)}
-                                className="bg-primary/10 p-2 rounded-full ml-2"
-                            >
-                                <Ionicons name="volume-medium" size={24} color="#1A6B4A" />
-                            </TouchableOpacity>
+                        <View className="items-center bg-surface p-4 rounded-2xl border border-surface-light w-32 shadow-sm">
+                            <Ionicons name="checkmark-circle" size={28} color={accuracy >= 80 ? "#58CC02" : theme.color} />
+                            <Text className="text-text-primary font-bold mt-2 text-2xl">{accuracy}%</Text>
+                            <Text className="text-text-secondary text-xs uppercase font-bold tracking-wider mt-1">Accuracy</Text>
                         </View>
                     </View>
-                )}
 
-                {/* Translate Answer Area */}
-                {currentExercise.type === 'translate' && (
-                    <View className="border-b-2 border-surface-light min-h-[60px] flex-row flex-wrap mb-12 py-2">
-                        {selectedOptions.map((opt, i) => (
-                            <TouchableOpacity key={i} onPress={() => toggleOption(opt)} className="bg-surface border border-surface-light p-3 rounded-xl m-1">
-                                <Text className="text-text-primary font-bold">{opt}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                )}
-
-                {/* Options Area */}
-                <View className="flex-row flex-wrap justify-center flex-1">
-                    {currentExercise.type === 'translate' && currentExercise.options?.map((opt, i) => (
-                        <TouchableOpacity
-                            key={i}
-                            disabled={selectedOptions.includes(opt)}
-                            onPress={() => toggleOption(opt)}
-                            className={`p-3 rounded-xl m-1 border-b-4 ${selectedOptions.includes(opt)
-                                ? 'bg-surface-light border-transparent opacity-30 shadow-none'
-                                : 'bg-surface border-surface-light shadow-sm'
-                                }`}
-                        >
-                            <Text className={`text-lg font-bold ${selectedOptions.includes(opt) ? 'text-transparent' : 'text-text-primary'}`}>
-                                {opt}
-                            </Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.goBack()}
+                        className={`nav-button w-full py-4 rounded-2xl items-center shadow-lg ${theme.btnColor}`}
+                    >
+                        <Text className="text-white font-black text-lg uppercase tracking-widest font-poppins">CONTINUE</Text>
+                    </TouchableOpacity>
+                </>
+            ) : (
+                <>
+                    {/* Header / Progress bar */}
+                    <View className="flex-row items-center px-6 pt-4 mb-10">
+                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                            <Ionicons name="close" size={28} color="#8B949E" />
                         </TouchableOpacity>
-                    ))}
-
-                    {currentExercise.type === 'speak' && (
-                        <View className="w-full items-center justify-center flex-1">
-                            <TouchableOpacity
-                                onPress={handleSubmit}
-                                className="items-center"
-                            >
-                                <Ionicons name="mic-circle" size={140} color="#1A6B4A" />
-                                <Text className="text-text-secondary mt-6 text-lg font-nunito">Tap to simulate voice</Text>
-                            </TouchableOpacity>
+                        <View className="flex-1 h-4 bg-surface-light rounded-full mx-4 overflow-hidden">
+                            <Animated.View
+                                style={{
+                                    height: '100%',
+                                    backgroundColor: '#58CC02',
+                                    width: progress.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0%', '100%']
+                                    })
+                                }}
+                            />
                         </View>
-                    )}
+                        <View className="flex-row items-center">
+                            <Ionicons name="heart" size={24} color="#FF4B4B" />
+                            <Text className="text-text-primary font-bold ml-1">{hearts}</Text>
+                        </View>
+                    </View>
 
-                    {currentExercise.type === 'match' && (
-                        <Animated.View style={{ transform: [{ translateX: shakeAnim }], flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%', flex: 1, paddingBottom: 20 }}>
-                            {matchCards.map((card) => {
-                                const isMatched = matchedPairs.includes(card.pairId);
-                                const isSelected = selectedMatch?.id === card.id;
+                    {/* Exercise Content */}
+                    <View className="px-6 flex-1">
+                        <Text className="text-text-primary text-2xl font-nunito font-bold mb-8">
+                            {currentExercise.question}
+                        </Text>
 
-                                return (
+                        {currentExercise.type !== 'match' && (
+                            <View className="flex-row items-start mb-12">
+                                <View className="w-20 h-20 bg-primary/20 rounded-2xl items-center justify-center mr-4">
+                                    <Text className="text-4xl text-white">🦉</Text>
+                                </View>
+                                <View className="bg-surface border border-surface-light p-4 rounded-2xl flex-1 flex-row items-center justify-between">
+                                    <Text className="text-text-primary text-lg flex-1">{currentExercise.question}</Text>
                                     <TouchableOpacity
-                                        key={card.id}
-                                        disabled={isMatched}
-                                        onPress={() => handleMatchSelection(card)}
-                                        className={`w-[48%] rounded-2xl mb-4 border-b-4 items-center justify-center min-h-[90px] ${isMatched
-                                            ? 'bg-surface-light border-transparent opacity-0 shadow-none' // Hide matched
-                                            : isSelected
-                                                ? 'bg-primary/20 border-primary shadow-sm' // Highlight selected
-                                                : 'bg-surface border-surface-light shadow-sm' // Default
-                                            }`}
+                                        onPress={() => playElevenLabsAudio(currentExercise.question)}
+                                        className="bg-primary/10 p-2 rounded-full ml-2"
                                     >
-                                        <Text className={`text-xl font-bold text-center px-2 ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
-                                            {card.text}
-                                        </Text>
+                                        <Ionicons name="volume-medium" size={24} color="#1A6B4A" />
                                     </TouchableOpacity>
-                                );
-                            })}
-                        </Animated.View>
-                    )}
-                </View>
-            </View>
+                                </View>
+                            </View>
+                        )}
 
-            {/* Feedback Footer */}
-            <View className={`px-6 pt-6 pb-10 ${feedback === 'correct' ? 'bg-[#D7FFB8]' :
-                feedback === 'incorrect' ? 'bg-[#FFDFE0]' : 'bg-background border-t border-surface-light'
-                }`}>
-                {feedback && (
-                    <View className="flex-row items-center mb-6">
-                        <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${feedback === 'correct' ? 'bg-[#58CC02]' : 'bg-[#FF4B4B]'
-                            }`}>
-                            <Ionicons name={feedback === 'correct' ? 'checkmark' : 'close'} size={28} color="white" />
-                        </View>
-                        <View className="flex-1">
-                            <Text className={`font-bold text-2xl ${feedback === 'correct' ? 'text-[#58CC02]' : 'text-[#EA2B2B]'
-                                }`}>
-                                {feedback === 'correct' ? 'Awesome!' : 'Correct solution:'}
-                            </Text>
-                            {feedback === 'incorrect' && (
-                                <Text className="text-[#EA2B2B] font-inter text-lg">{currentExercise.target}</Text>
+                        {/* Translate Answer Area */}
+                        {currentExercise.type === 'translate' && (
+                            <View className="border-b-2 border-surface-light min-h-[60px] flex-row flex-wrap mb-12 py-2">
+                                {selectedOptions.map((opt, i) => (
+                                    <TouchableOpacity key={i} onPress={() => toggleOption(opt)} className="bg-surface border border-surface-light p-3 rounded-xl m-1">
+                                        <Text className="text-text-primary font-bold">{opt}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+                        )}
+
+                        {/* Options Area */}
+                        <View className="flex-row flex-wrap justify-center flex-1">
+                            {currentExercise.type === 'translate' && currentExercise.options?.map((opt, i) => (
+                                <TouchableOpacity
+                                    key={i}
+                                    disabled={selectedOptions.includes(opt)}
+                                    onPress={() => toggleOption(opt)}
+                                    className={`p-3 rounded-xl m-1 border-b-4 ${selectedOptions.includes(opt)
+                                        ? 'bg-surface-light border-transparent opacity-30 shadow-none'
+                                        : 'bg-surface border-surface-light shadow-sm'
+                                        }`}
+                                >
+                                    <Text className={`text-lg font-bold ${selectedOptions.includes(opt) ? 'text-transparent' : 'text-text-primary'}`}>
+                                        {opt}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+
+                            {currentExercise.type === 'speak' && (
+                                <View className="w-full items-center justify-center flex-1">
+                                    <TouchableOpacity
+                                        onPress={handleSubmit}
+                                        className="items-center"
+                                    >
+                                        <Ionicons name="mic-circle" size={140} color="#1A6B4A" />
+                                        <Text className="text-text-secondary mt-6 text-lg font-nunito">Tap to simulate voice</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+
+                            {currentExercise.type === 'match' && (
+                                <Animated.View style={{ transform: [{ translateX: shakeAnim }], flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', width: '100%', flex: 1, paddingBottom: 20 }}>
+                                    {matchCards.map((card) => {
+                                        const isMatched = matchedPairs.includes(card.pairId);
+                                        const isSelected = selectedMatch?.id === card.id;
+
+                                        return (
+                                            <TouchableOpacity
+                                                key={card.id}
+                                                disabled={isMatched}
+                                                onPress={() => handleMatchSelection(card)}
+                                                className={`w-[48%] rounded-2xl mb-4 border-b-4 items-center justify-center min-h-[90px] ${isMatched
+                                                    ? 'bg-surface-light border-transparent opacity-0 shadow-none' // Hide matched
+                                                    : isSelected
+                                                        ? 'bg-primary/20 border-primary shadow-sm' // Highlight selected
+                                                        : 'bg-surface border-surface-light shadow-sm' // Default
+                                                    }`}
+                                            >
+                                                <Text className={`text-xl font-bold text-center px-2 ${isSelected ? 'text-primary' : 'text-text-primary'}`}>
+                                                    {card.text}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </Animated.View>
                             )}
                         </View>
                     </View>
-                )}
 
-                <TouchableOpacity
-                    onPress={feedback ? handleContinue : handleSubmit}
-                    className={`py-4 rounded-2xl items-center shadow-lg ${feedback === 'correct' ? 'bg-[#58CC02]' :
-                        feedback === 'incorrect' ? 'bg-[#FF4B4B]' : 'bg-primary'
-                        }`}
-                >
-                    <Text className="text-white font-bold text-lg uppercase tracking-widest font-poppins">
-                        {feedback ? 'Continue' : 'Check'}
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                    {/* Feedback Footer */}
+                    <View className={`px-6 pt-6 pb-10 ${feedback === 'correct' ? 'bg-[#D7FFB8]' :
+                        feedback === 'incorrect' ? 'bg-[#FFDFE0]' : 'bg-background border-t border-surface-light'
+                        }`}>
+                        {feedback && (
+                            <View className="flex-row items-center mb-6">
+                                <View className={`w-12 h-12 rounded-full items-center justify-center mr-4 ${feedback === 'correct' ? 'bg-[#58CC02]' : 'bg-[#FF4B4B]'
+                                    }`}>
+                                    <Ionicons name={feedback === 'correct' ? 'checkmark' : 'close'} size={28} color="white" />
+                                </View>
+                                <View className="flex-1">
+                                    <Text className={`font-bold text-2xl ${feedback === 'correct' ? 'text-[#58CC02]' : 'text-[#EA2B2B]'
+                                        }`}>
+                                        {feedback === 'correct' ? 'Awesome!' : 'Correct solution:'}
+                                    </Text>
+                                    {feedback === 'incorrect' && (
+                                        <Text className="text-[#EA2B2B] font-inter text-lg">{currentExercise.target}</Text>
+                                    )}
+                                </View>
+                            </View>
+                        )}
+
+                        <TouchableOpacity
+                            onPress={feedback ? handleContinue : handleSubmit}
+                            className={`py-4 rounded-2xl items-center shadow-lg ${feedback === 'correct' ? 'bg-[#58CC02]' :
+                                feedback === 'incorrect' ? 'bg-[#FF4B4B]' : 'bg-primary'
+                                }`}
+                        >
+                            <Text className="text-white font-bold text-lg uppercase tracking-widest font-poppins">
+                                {feedback ? 'Continue' : 'Check'}
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </>
+            )}
         </SafeAreaView>
     );
 }

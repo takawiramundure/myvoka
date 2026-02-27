@@ -18,13 +18,39 @@ const _playAudio = async (text: string, voiceId: string): Promise<void> => {
     const store = useConversationStore.getState();
     store.setTutorSpeaking(true);
 
-    if (!API_KEY) {
-        console.warn("⚠️ EXPO_PUBLIC_ELEVENLABS_API_KEY is missing from .env! Cannot play TTS audio.");
-        store.setTutorSpeaking(false);
-        return;
-    }
+    const safeName = text.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const cloudUrl = `https://storage.googleapis.com/voka-31483.firebasestorage.app/audio/ibibio/${safeName}.mp3`;
 
     try {
+        // 1. Try to play pre-computed audio from Firebase Storage (Fast path)
+        const check = await fetch(cloudUrl, { method: 'HEAD' });
+
+        if (check.ok) {
+            await new Promise<void>(async (resolve, reject) => {
+                try {
+                    const { sound } = await Audio.Sound.createAsync({ uri: cloudUrl });
+                    sound.setOnPlaybackStatusUpdate((status) => {
+                        if (status.isLoaded && status.didJustFinish) {
+                            store.setTutorSpeaking(false);
+                            sound.unloadAsync();
+                            resolve();
+                        }
+                    });
+                    await sound.playAsync();
+                } catch (e) {
+                    reject(e);
+                }
+            });
+            return;
+        }
+
+        // 2. Playback pre-computed failed, attempt live TTS generation
+        if (!API_KEY) {
+            console.warn("⚠️ EXPO_PUBLIC_ELEVENLABS_API_KEY is missing from .env! Cannot play TTS audio.");
+            store.setTutorSpeaking(false);
+            return;
+        }
+
         const response = await fetch(
             `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?output_format=mp3_44100_128`,
             {
