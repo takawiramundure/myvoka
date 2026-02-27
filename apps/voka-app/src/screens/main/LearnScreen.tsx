@@ -84,7 +84,7 @@ export default function LearnScreen() {
         }
     };
 
-    const renderMapPath = () => {
+    const renderHopscotchGrid = () => {
         if (units.length === 0) {
             return (
                 <View className="items-center justify-center p-10 flex-1">
@@ -93,69 +93,77 @@ export default function LearnScreen() {
             );
         }
 
-        return units.map((unit, index) => {
-            const isCompleted = completedUnits.includes(unit.id);
-            // It is unlocked if it's the first unit, OR the previous unit is completed.
-            const isUnlocked = isCompleted || (index === 0 || completedUnits.includes(units[index - 1].id));
-            const status = isCompleted ? 'completed' : isUnlocked ? 'unlocked' : 'locked';
+        const rows: { units: Unit[], type: 'single' | 'double' }[] = [];
+        let i = 0;
+        while (i < units.length) {
+            if (i % 3 === 0) {
+                rows.push({ units: [units[i]], type: 'single' });
+                i += 1;
+            } else {
+                const row = [units[i]];
+                if (i + 1 < units.length) {
+                    row.push(units[i + 1]);
+                }
+                rows.push({ units: row, type: 'double' });
+                i += 2;
+            }
+        }
 
-            // Calculate an undulating explorer map offset
-            // We alternate left/right gently
-            const pathOffset = Math.sin(index * 1.5) * 60;
+        return (
+            <View className="w-full px-4 items-center pb-10 pt-4">
+                {rows.map((row, rowIndex) => (
+                    <View key={rowIndex} className={`flex-row justify-center items-start w-full mb-6 ${row.type === 'double' ? 'space-x-6' : ''}`}>
+                        {row.units.map((unit) => {
+                            const index = units.findIndex(u => u.id === unit.id);
+                            const isCompleted = completedUnits.includes(unit.id);
+                            const isUnlocked = isCompleted || (index === 0 || completedUnits.includes(units[index - 1].id));
+                            const status = isCompleted ? 'completed' : isUnlocked ? 'unlocked' : 'locked';
 
-            // For Biome feel - let's alternate colors every 5 levels if we had them. 
-            // Better contrast tailored for dark mode
-            const biomeColors = ['#152419', '#241D12', '#141D26', '#221825'];
-            const biomeBgColor = biomeColors[Math.floor(index / 3) % biomeColors.length];
-            const nodeBg = status === 'completed' ? 'bg-[#58CC02]' : status === 'unlocked' ? 'bg-primary' : 'bg-surface-light border-4 border-surface';
+                            const nodeBg = status === 'completed'
+                                ? 'bg-surface-light border-2 border-surface opacity-60'
+                                : status === 'unlocked'
+                                    ? 'bg-primary border-2 border-[#58CC02]'
+                                    : 'bg-surface border-2 border-surface-light opacity-50';
 
-            return (
-                <View key={unit.id} className="w-full relative py-8 items-center" style={{ backgroundColor: index % 3 === 0 ? biomeBgColor : 'transparent' }}>
+                            return (
+                                <View key={unit.id} className="items-center relative mx-2">
+                                    {status === 'unlocked' && (
+                                        <View className="bg-background px-3 py-1 rounded-full mb-2 shadow-sm border border-primary absolute -top-8 z-20">
+                                            <Text className="text-primary font-poppins font-bold uppercase tracking-widest text-[9px]">Start</Text>
+                                        </View>
+                                    )}
 
-                    {/* Render Trail line connecting to the PREVIOUS node (if not the first) */}
-                    {index > 0 && (
-                        <View className="absolute top-[-40px] bottom-1/2 w-4 border-l-4 border-dashed border-surface-light opacity-50 z-0"
-                            style={{ transform: [{ translateX: (pathOffset + Math.sin((index - 1) * 1.5) * 60) / 2 }] }}
-                        />
-                    )}
+                                    <TouchableOpacity
+                                        onPress={() => handleNodePress(unit, status)}
+                                        disabled={status === 'locked'}
+                                        className={`w-28 h-28 rounded-3xl items-center justify-center shadow-lg ${nodeBg}`}
+                                    >
+                                        <Ionicons
+                                            name={status === 'completed' ? 'checkmark' : status === 'locked' ? 'lock-closed' : 'book'}
+                                            size={42}
+                                            color={status === 'locked' ? '#8B949E' : 'white'}
+                                        />
 
-                    <View className="items-center z-10" style={{ transform: [{ translateX: pathOffset }] }}>
-                        {status === 'unlocked' && (
-                            <View className="bg-background px-4 py-2 rounded-xl mb-3 shadow-[0_4px_10px_rgba(0,0,0,0.1)] border-2 border-primary">
-                                <Text className="text-primary font-poppins font-bold uppercase tracking-widest text-xs">Start Here</Text>
-                            </View>
-                        )}
+                                        {status === 'unlocked' && (
+                                            <Animated.View
+                                                className="absolute inset-0 border-[5px] border-[#D7FFB8] rounded-3xl opacity-60"
+                                                style={{ transform: [{ scale: pulseAnim }] }}
+                                            />
+                                        )}
+                                    </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={() => handleNodePress(unit, status)}
-                            disabled={status === 'locked'}
-                            className={`w-24 h-24 rounded-full items-center justify-center shadow-lg ${nodeBg}`}
-                        >
-                            <Ionicons
-                                name={status === 'completed' ? 'checkmark' : status === 'locked' ? 'lock-closed' : 'bonfire'}
-                                size={40}
-                                color={status === 'locked' ? '#8B949E' : 'white'}
-                            />
-
-                            {/* Active Node Pulse Ring */}
-                            {status === 'unlocked' && (
-                                <Animated.View
-                                    className="absolute inset-0 border-4 border-primary rounded-full opacity-50"
-                                    style={{ transform: [{ scale: pulseAnim }] }}
-                                />
-                            )}
-                        </TouchableOpacity>
-
-                        <Text className={`mt-3 font-poppins font-bold text-lg text-center px-4 ${status === 'locked' ? 'text-text-secondary opacity-60' : 'text-text-primary'}`}>
-                            {unit.title}
-                        </Text>
-                        <Text className="text-text-secondary text-xs text-center px-8 mt-1">
-                            {unit.description}
-                        </Text>
+                                    <View className="mt-3 w-28 items-center">
+                                        <Text numberOfLines={2} className={`font-poppins font-bold text-center tracking-tight leading-tight ${status === 'locked' || status === 'completed' ? 'text-text-secondary opacity-60' : 'text-text-primary'}`}>
+                                            {unit.title}
+                                        </Text>
+                                    </View>
+                                </View>
+                            );
+                        })}
                     </View>
-                </View>
-            );
-        });
+                ))}
+            </View>
+        );
     };
 
     return (
@@ -174,14 +182,14 @@ export default function LearnScreen() {
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Map Header */}
-                    <View className="px-6 py-8 items-center bg-surface border-b-2 border-surface-light rounded-b-[40px] mb-8 shadow-sm">
+                    <View className="px-6 py-8 items-center bg-surface border-b-2 border-surface-light rounded-b-[40px] mb-4 shadow-sm">
                         <Text className="text-primary font-bold opacity-80 text-xs tracking-widest uppercase mb-1">{selectedLanguage} ADVENTURE</Text>
                         <Text className="text-text-primary text-3xl font-poppins font-black text-center">
-                            The Explorer's Map
+                            The Learning Path
                         </Text>
                     </View>
 
-                    {renderMapPath()}
+                    {renderHopscotchGrid()}
 
                 </ScrollView>
             )}
