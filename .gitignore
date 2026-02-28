@@ -38,3 +38,10 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Firebase Service Account Credentials
+*-firebase-adminsdk-*.json
+
+# Root level native directories (accidental generation)
+/ios/
+/android/
