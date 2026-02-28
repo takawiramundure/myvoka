@@ -19,5 +19,9 @@
     "expo": "~54.0.33",
     "react": "19.1.0",
     "react-native": "0.81.5"
+  },
+  "overrides": {
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-reanimated": "~4.1.1"
   }
 }

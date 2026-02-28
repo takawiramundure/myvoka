@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 import { Audio } from 'expo-av';
 import Animated, {
     useSharedValue,
@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useConversationStore } from '../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
 import { playElevenLabsAudio } from '../services/elevenlabs';
-import { app, functions } from '../services/firebase';
+import { functions } from '../services/firebase';
 import { httpsCallable } from 'firebase/functions';
 import * as FileSystem from 'expo-file-system/legacy';
 
@@ -21,6 +21,18 @@ const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export default function RecordButton() {
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
+
+    // Ref mirrors state but is synchronously readable in callbacks — prevents
+    // the stale-closure race condition where stopRecording sees recording===null
+    // because React hasn't flushed the state update from startRecording yet.
+    // This was the root cause of the EXC_CRASH (SIGABRT) on Thread 13:
+    // a dangling recording was never stopped, and the next press tried to
+    // create a second concurrent recording → native iOS exception → abort.
+    const recordingRef = React.useRef<Audio.Recording | null>(null);
+
+    // Lock prevents a second recording from starting before the first is ready.
+    const isStartingRef = React.useRef(false);
+
     const isRecording = useConversationStore((s) => s.isRecording);
     const {
         setRecording: setRecordingState,
@@ -35,16 +47,11 @@ export default function RecordButton() {
         selectedLanguage
     } = useConversationStore();
 
-    // Animation for the pulsing effect
     const scale = useSharedValue(1);
 
     useEffect(() => {
         if (isRecording) {
-            scale.value = withRepeat(
-                withTiming(1.2, { duration: 800 }),
-                -1,
-                true
-            );
+            scale.value = withRepeat(withTiming(1.2, { duration: 800 }), -1, true);
         } else {
             scale.value = withSpring(1);
         }
@@ -55,6 +62,10 @@ export default function RecordButton() {
     }));
 
     async function startRecording() {
+        // Guard: don't start if already starting or a recording already exists
+        if (isStartingRef.current || recordingRef.current) return;
+        isStartingRef.current = true;
+
         try {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             const permission = await Audio.requestPermissionsAsync();
@@ -69,11 +80,17 @@ export default function RecordButton() {
                     Audio.RecordingOptionsPresets.HIGH_QUALITY
                 );
 
+                // Set ref BEFORE state — ref is synchronously readable,
+                // state update is asynchronous (batched by React).
+                recordingRef.current = recording;
                 setRecording(recording);
                 setRecordingState(true);
             }
         } catch (err) {
             console.error('Failed to start recording', err);
+            recordingRef.current = null;
+        } finally {
+            isStartingRef.current = false;
         }
     }
 
@@ -81,84 +98,83 @@ export default function RecordButton() {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setRecordingState(false);
 
-        if (recording) {
+        // Read from ref (always current) — not from state (may be stale).
+        const currentRecording = recordingRef.current;
+
+        if (currentRecording) {
+            // Clear ref immediately so a rapid second press won't double-stop.
+            recordingRef.current = null;
+            setRecording(null);
+
             try {
-                await recording.stopAndUnloadAsync();
+                await currentRecording.stopAndUnloadAsync();
                 await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-                const uri = recording.getURI();
-                console.log('Recording stopped and stored at', uri);
-
+                const uri = currentRecording.getURI();
                 if (!uri) return;
 
                 setCurrentTranscript('Transcribing...');
 
-                // 1. Convert audio file to Base64
                 const base64Audio = await FileSystem.readAsStringAsync(uri, {
                     encoding: 'base64',
                 });
 
-                // 2. Call Firebase Cloud Function
                 const analyzeAudioFn = httpsCallable(functions, 'analyzeAudio');
-
-                // Get history for context (last 5 messages)
                 const history = messages.slice(-5);
 
                 const result: any = await analyzeAudioFn({
                     audio: base64Audio,
-                    sessionPhase: sessionPhase,
-                    history: history,
+                    sessionPhase,
+                    history,
                     language: selectedLanguage,
-                    mode: activeMode
+                    mode: activeMode,
                 });
 
-                const { userText, tutorResponse, corrections, nextPhase } = result.data as { userText: string, tutorResponse: string, corrections: any[], nextPhase?: string };
+                const { userText, tutorResponse, corrections, nextPhase } =
+                    result.data as {
+                        userText: string;
+                        tutorResponse: string;
+                        corrections: any[];
+                        nextPhase?: string;
+                    };
 
-                // 3. Update UI with User Text
                 addMessage({
                     id: Date.now().toString(),
                     role: 'user',
                     text: userText,
-                    timestamp: new Date()
+                    timestamp: new Date(),
                 });
 
                 setCurrentTranscript('Correcting...');
                 await delay(500);
                 setCurrentTranscript('');
 
-                // 4. Update UI with Tutor Response
                 addMessage({
                     id: (Date.now() + 1).toString(),
                     role: 'tutor',
                     text: tutorResponse,
                     timestamp: new Date(),
-                    corrections: corrections && corrections.length > 0 ? corrections : undefined
+                    corrections: corrections?.length > 0 ? corrections : undefined,
                 });
 
-                // 5. Fire ElevenLabs TTS
                 await playElevenLabsAudio(tutorResponse);
 
-                // 6. Handle automatic phase transitions
                 if (nextPhase) {
                     setSessionPhase(nextPhase as any);
                 } else if (sessionPhase === 'greeting') {
                     setSessionPhase('quiz');
                 } else if (sessionPhase === 'quiz') {
-                    // Logic for quiz index (if not guided by nextPhase)
                     if (quizQuestionIndex < 2) {
                         setQuizQuestionIndex(quizQuestionIndex + 1);
                     } else {
-                        setSessionPhase('conversation'); // Default to conversation after quiz
+                        setSessionPhase('conversation');
                     }
                 }
-
             } catch (err) {
                 console.error('AI Processing Error:', err);
                 setCurrentTranscript('Error processing voice.');
                 await delay(2000);
                 setCurrentTranscript('');
-            } finally {
-                setRecording(null);
             }
         }
     }

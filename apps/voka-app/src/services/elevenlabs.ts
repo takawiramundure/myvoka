@@ -117,8 +117,11 @@ const fetchAndCacheOptionally = async (text: string, voiceId: string, cacheUri: 
                     sound.setOnPlaybackStatusUpdate((status) => {
                         if (status.isLoaded && status.didJustFinish) {
                             store.setTutorSpeaking(false);
-                            sound.unloadAsync();
-                            resolve();
+                            // Await unload before resolving to prevent audio session races
+                            void (async () => {
+                                try { await sound.unloadAsync(); } catch (_) { }
+                                resolve();
+                            })();
                         }
                     });
                     await sound.playAsync();
@@ -149,8 +152,10 @@ const _playAudio = async (text: string): Promise<void> => {
                 sound.setOnPlaybackStatusUpdate((status) => {
                     if (status.isLoaded && status.didJustFinish) {
                         store.setTutorSpeaking(false);
-                        sound.unloadAsync();
-                        resolve();
+                        void (async () => {
+                            try { await sound.unloadAsync(); } catch (_) { }
+                            resolve();
+                        })();
                     }
                 });
                 await sound.playAsync();

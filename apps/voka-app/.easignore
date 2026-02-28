@@ -1,0 +1,16 @@
+# Ignore macOS and generic build folders
+.DS_Store
+node_modules/
+dist/
+.expo/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Ignore Native folders created locally
+android/
+ios/
+
+# DO NOT IGNORE .ENV FILE!
+# This allows Expo's cloud servers to inject Firebase and ElevenLabs configuration
+!.env

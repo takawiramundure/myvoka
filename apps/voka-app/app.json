@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.supportdmlabsinc.voka-app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Allow Voka app to access your microphone for recording audio to the tutor."
+        "NSMicrophoneUsageDescription": "Allow Voka app to access your microphone for recording audio to the tutor.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,8 +28,6 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.RECORD_AUDIO",
         "android.permission.MODIFY_AUDIO_SETTINGS"
       ],
@@ -45,6 +44,11 @@
         }
       ],
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5a0a3daa-fdbb-4dd1-86c1-f5db97400a47"
+      }
+    }
   }
 }
