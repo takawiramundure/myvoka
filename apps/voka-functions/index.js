@@ -89,6 +89,13 @@ The user's speech was just transcribed as: "${userText}".
 - Common Greetings: "Nnọọ" (Welcome), "Kẹdụ?" (How are you?), "Ọ dị mma" (I am fine), "Daalụ" / "Imela" (Thank you), "Ka ọmesịa" (Goodbye).
 - Cultural Note: Emphasize respect and hospitality which are foundational to Igbo interaction.
 `;
+        } else if (language.toLowerCase() === 'afrikaans') {
+            systemPrompt += `AFRIKAANS LINGUISTIC CONTEXT:
+- Grammar: West Germanic language with simplified grammar. No grammatical gender, and verbs are not conjugated based on the subject (e.g., "ek is", "jy is", "hy is"). Double negation is a prominent feature (e.g. "Ek kan nie Afrikaans praat nie").
+- Common Greetings: "Goeiemôre" (Good morning), "Hoe gaan dit?" (How are you?), "Dankie" (Thank you), "Totsiens" (Goodbye).
+- Dialects & Tone: Direct but friendly. It is very common to use loanwords from English and indigenous South African languages.
+- Syllables & Pronunciation: Vowels can be long or short. The 'r' is usually rolled. 
+`;
         }
 
         systemPrompt += `
