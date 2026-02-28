@@ -1,21 +1,49 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SUPPORTED_LANGUAGES, LanguageOption } from '../../constants/languages';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import clsx from 'clsx';
 import { useConversationStore } from '../../stores/useConversationStore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { db } from '../../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function HomeScreen() {
     const navigation = useNavigation<any>();
+    const isFocused = useIsFocused();
     const { selectedLanguage, setSelectedLanguage, practiceGoal, flashcardsCompleted } = useConversationStore();
     const { user } = useAuthStore();
+    const [progressPercentage, setProgressPercentage] = useState(0);
 
     // Default to first language if none selected
     const currentLang = SUPPORTED_LANGUAGES.find(l => l.id === selectedLanguage) || SUPPORTED_LANGUAGES[0];
     const otherLanguages = SUPPORTED_LANGUAGES.filter(l => l.id !== currentLang.id);
+
+    useEffect(() => {
+        const fetchProgress = async () => {
+            if (user?.uid) {
+                try {
+                    const docRef = doc(db, 'users', user.uid);
+                    const userDoc = await getDoc(docRef);
+                    if (userDoc.exists() && userDoc.data().completedUnits) {
+                        const completed = userDoc.data().completedUnits[currentLang.id] || [];
+                        const percentage = Math.round((completed.length / 6) * 100);
+                        setProgressPercentage(Math.min(percentage, 100));
+                    } else {
+                        setProgressPercentage(0);
+                    }
+                } catch (e) {
+                    console.error("Error fetching progress: ", e);
+                    setProgressPercentage(0);
+                }
+            } else {
+                setProgressPercentage(0);
+            }
+        };
+        fetchProgress();
+    }, [user, currentLang.id, isFocused]);
 
     return (
         <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -28,11 +56,11 @@ export default function HomeScreen() {
                 <View className="flex-row items-center space-x-6">
                     <View className="flex-row items-center mr-4">
                         <Ionicons name="star-outline" size={20} color="#E8A020" />
-                        <Text className="text-text-primary ml-1 font-poppins text-base">50</Text>
+                        <Text className="text-text-primary ml-1 font-poppins text-base">{useConversationStore(s => s.xp) || 0}</Text>
                     </View>
                     <View className="flex-row items-center">
                         <Ionicons name="flash-outline" size={20} color="#00E5FF" />
-                        <Text className="text-text-primary ml-1 font-poppins text-base">10%</Text>
+                        <Text className="text-text-primary ml-1 font-poppins text-base">{progressPercentage}%</Text>
                     </View>
                 </View>
             </View>
@@ -82,17 +110,17 @@ export default function HomeScreen() {
                 >
                     <View className="flex-1 pr-4">
                         <Text className="text-neon-cyan font-poppins font-bold text-sm tracking-widest uppercase mb-4 leading-6">
-                            YOU'RE {currentLang.name === 'Ibibio' ? '10%' : '0%'} THROUGH THE {currentLang.name.toUpperCase()} BEGINNER LEVEL.
+                            YOU'RE {progressPercentage}% THROUGH THE {currentLang.name.toUpperCase()} BEGINNER LEVEL.
                         </Text>
 
                         <View className="flex-row items-center mb-2">
                             <Ionicons name="flash-outline" size={16} color="#00E5FF" />
-                            <Text className="text-text-primary font-bold text-sm ml-1">10%</Text>
+                            <Text className="text-text-primary font-bold text-sm ml-1">{progressPercentage}%</Text>
                         </View>
 
                         {/* Progress Bar */}
                         <View className="w-full h-2 bg-background rounded-full overflow-hidden">
-                            <View className="w-[10%] h-full bg-neon-cyan rounded-full" />
+                            <View style={{ width: `${progressPercentage}%` }} className="h-full bg-neon-cyan rounded-full" />
                         </View>
                     </View>
 

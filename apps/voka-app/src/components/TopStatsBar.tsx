@@ -2,17 +2,20 @@ import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useConversationStore } from '../stores/useConversationStore';
+import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 
 export default function TopStatsBar() {
-    const { streak, xp, hearts, gems } = useConversationStore();
+    const { streak, xp, hearts, gems, selectedLanguage } = useConversationStore();
+    const currentLang = SUPPORTED_LANGUAGES.find((l: any) => l.id === selectedLanguage) || SUPPORTED_LANGUAGES[0];
+    const currentLevel = Math.floor(xp / 100) + 1;
 
     return (
         <View className="flex-row items-center justify-between px-6 py-4 bg-background border-b border-surface-light">
             <View className="flex-row items-center space-x-4">
                 {/* Flag / Language */}
                 <View className="flex-row items-center">
-                    <Text className="text-xl mr-1">🇳🇬</Text>
-                    <Text className="text-text-primary font-bold">19</Text>
+                    <Text className="text-xl mr-1">{currentLang.flag}</Text>
+                    <Text className="text-text-primary font-bold">{currentLevel}</Text>
                 </View>
 
                 {/* Streak */}
