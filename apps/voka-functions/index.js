@@ -68,6 +68,13 @@ The user's speech was just transcribed as: "${userText}".
 - Cultural Note: Swahili culture heavily emphasizes greeting rituals. It's polite to inquire about someone's day, family, and state before getting to the point.
 - Syllables: Swahili is highly phonetic; every letter is pronounced clearly and syllables usually end in vowels.
 `;
+        } else if (language.toLowerCase() === 'yoruba') {
+            systemPrompt += `YORUBA LINGUISTIC CONTEXT:
+- Tone: Yoruba is highly tonal with three distinct tones: High, Mid, Low. Tone completely changes meaning (e.g. "Oko" can mean Husband or Vehicle).
+- Grammar: Subject-Verb-Object (SVO) sequence. Use of honorifics makes greeting elders different than peers.
+- Common Greetings: "Bawo ni?" (How are things?), "E kaaro" (Good morning - polite "E" for elders or plural), "Ese" (Thank you), "O dabo" (Goodbye).
+- Cultural Note: Respect for elders is paramount. Correct users softly if they forget to use the honorific "E" prefix when addressing older or plural people.
+`;
         }
 
         systemPrompt += `

@@ -39,7 +39,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
         name: 'Yoruba',
         nativeName: 'Èdè Yorùbá',
         flag: '🇳🇬',
-        status: 'beta',
+        status: 'available',
         learners: '8k',
     },
     {
