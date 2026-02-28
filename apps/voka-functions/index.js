@@ -61,6 +61,13 @@ The user's speech was just transcribed as: "${userText}".
 - Common Greetings: "Ina kwana" (Good morning), "Yaya dai?" or "Yaya kake/kike?" (How are you?), "Nagode" (Thank you), "Sai da safe" (Good night).
 - Cultural Note: Respect for elders and traditional titles are very important in Hausa dialogue. Show warmth and politeness.
 `;
+        } else if (language.toLowerCase() === 'swahili') {
+            systemPrompt += `SWAHILI LINGUISTIC CONTEXT:
+- Grammar: Swahili uses noun classes (like M/Wa, Ki/Vi) and prefixes for subject, tense, and object within verbs (e.g. "Ni-na-ku-penda").
+- Common Greetings: "Jambo" / "Hujambo" (Hello/How are you?), "Sijambo" (I am fine), "Habari yako/zenu?" (What's your news?), "Asante" (Thank you), "Karibu" (Welcome).
+- Cultural Note: Swahili culture heavily emphasizes greeting rituals. It's polite to inquire about someone's day, family, and state before getting to the point.
+- Syllables: Swahili is highly phonetic; every letter is pronounced clearly and syllables usually end in vowels.
+`;
         }
 
         systemPrompt += `
