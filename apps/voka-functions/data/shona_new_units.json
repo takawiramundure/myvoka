@@ -1,0 +1,278 @@
+[
+    {
+        "title": "Action Words 1",
+        "exercises": [
+            {
+                "type": "translate",
+                "question": "How do you say 'wash something'?",
+                "target": "kusuka",
+                "options": [
+                    "kusuka",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kusuka"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'give kupa scoop water out'?",
+                "target": "kupa",
+                "options": [
+                    "kupa",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kupa"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'graze kufara blow'?",
+                "target": "kufura",
+                "options": [
+                    "kufura",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kufura"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'dig kuch\u00e9ra draw water'?",
+                "target": "kuchera",
+                "options": [
+                    "kuchera",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kuchera"
+            }
+        ]
+    },
+    {
+        "title": "Action Words 2",
+        "exercises": [
+            {
+                "type": "translate",
+                "question": "How do you say 'kunwa kusimba'?",
+                "target": "kuwa",
+                "options": [
+                    "kuwa",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kuwa"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'kut\u00e9nga kuona'?",
+                "target": "kubvunza",
+                "options": [
+                    "kubvunza",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kubvunza"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'kuch\u00e9ka kunamata'?",
+                "target": "kusimba",
+                "options": [
+                    "kusimba",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kusimba"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'kut\u00e9ng\u00e9sa'?",
+                "target": "kutarisa",
+                "options": [
+                    "kutarisa",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "kutarisa"
+            }
+        ]
+    },
+    {
+        "title": "Nouns and Objects 1",
+        "exercises": [
+            {
+                "type": "translate",
+                "question": "How do you say 'knives'?",
+                "target": "mapanga",
+                "options": [
+                    "mapanga",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "mapanga"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'this'?",
+                "target": "iyi",
+                "options": [
+                    "iyi",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "iyi"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'mountain'?",
+                "target": "gomo",
+                "options": [
+                    "gomo",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "gomo"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'fathers'?",
+                "target": "vababa",
+                "options": [
+                    "vababa",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "vababa"
+            }
+        ]
+    },
+    {
+        "title": "Nouns and Objects 2",
+        "exercises": [
+            {
+                "type": "translate",
+                "question": "How do you say 'things'?",
+                "target": "zvinhu",
+                "options": [
+                    "zvinhu",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "zvinhu"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'milk'?",
+                "target": "mukaka",
+                "options": [
+                    "mukaka",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "mukaka"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'muiti'?",
+                "target": "munda",
+                "options": [
+                    "munda",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "munda"
+            },
+            {
+                "type": "translate",
+                "question": "How do you say 'vasikana'?",
+                "target": "miti",
+                "options": [
+                    "miti",
+                    "Mhoro",
+                    "Ehe",
+                    "Kwete"
+                ]
+            },
+            {
+                "type": "speak",
+                "question": "Speak this phrase:",
+                "target": "miti"
+            }
+        ]
+    }
+]

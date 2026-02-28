@@ -157,6 +157,71 @@ const units = [
             { id: '6', type: 'speak', question: 'Say "Musoro"', target: 'Musoro', category: 'Body', difficulty: 'Beginner' },
         ]
     }
+,
+    {
+        id: 'unit_7',
+        title: 'Action Words 1',
+        order: 7,
+        description: 'New lesson generated from textbook.',
+        exercises: [
+            { id: '1', type: 'translate', question: "How do you say 'wash something'?", target: 'kusuka', options: ["kusuka","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '2', type: 'speak', question: 'Speak this phrase:', target: 'kusuka', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '3', type: 'translate', question: "How do you say 'give kupa scoop water out'?", target: 'kupa', options: ["kupa","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '4', type: 'speak', question: 'Speak this phrase:', target: 'kupa', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '5', type: 'translate', question: "How do you say 'graze kufara blow'?", target: 'kufura', options: ["kufura","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '6', type: 'speak', question: 'Speak this phrase:', target: 'kufura', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '7', type: 'translate', question: "How do you say 'dig kuchéra draw water'?", target: 'kuchera', options: ["kuchera","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '8', type: 'speak', question: 'Speak this phrase:', target: 'kuchera', category: 'Pronunciation', difficulty: 'Intermediate' },
+        ]
+    },
+    {
+        id: 'unit_8',
+        title: 'Action Words 2',
+        order: 8,
+        description: 'New lesson generated from textbook.',
+        exercises: [
+            { id: '1', type: 'translate', question: "How do you say 'kunwa kusimba'?", target: 'kuwa', options: ["kuwa","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '2', type: 'speak', question: 'Speak this phrase:', target: 'kuwa', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '3', type: 'translate', question: "How do you say 'kuténga kuona'?", target: 'kubvunza', options: ["kubvunza","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '4', type: 'speak', question: 'Speak this phrase:', target: 'kubvunza', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '5', type: 'translate', question: "How do you say 'kuchéka kunamata'?", target: 'kusimba', options: ["kusimba","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '6', type: 'speak', question: 'Speak this phrase:', target: 'kusimba', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '7', type: 'translate', question: "How do you say 'kuténgésa'?", target: 'kutarisa', options: ["kutarisa","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '8', type: 'speak', question: 'Speak this phrase:', target: 'kutarisa', category: 'Pronunciation', difficulty: 'Intermediate' },
+        ]
+    },
+    {
+        id: 'unit_9',
+        title: 'Nouns and Objects 1',
+        order: 9,
+        description: 'New lesson generated from textbook.',
+        exercises: [
+            { id: '1', type: 'translate', question: "How do you say 'knives'?", target: 'mapanga', options: ["mapanga","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '2', type: 'speak', question: 'Speak this phrase:', target: 'mapanga', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '3', type: 'translate', question: "How do you say 'this'?", target: 'iyi', options: ["iyi","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '4', type: 'speak', question: 'Speak this phrase:', target: 'iyi', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '5', type: 'translate', question: "How do you say 'mountain'?", target: 'gomo', options: ["gomo","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '6', type: 'speak', question: 'Speak this phrase:', target: 'gomo', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '7', type: 'translate', question: "How do you say 'fathers'?", target: 'vababa', options: ["vababa","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '8', type: 'speak', question: 'Speak this phrase:', target: 'vababa', category: 'Pronunciation', difficulty: 'Intermediate' },
+        ]
+    },
+    {
+        id: 'unit_10',
+        title: 'Nouns and Objects 2',
+        order: 10,
+        description: 'New lesson generated from textbook.',
+        exercises: [
+            { id: '1', type: 'translate', question: "How do you say 'things'?", target: 'zvinhu', options: ["zvinhu","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '2', type: 'speak', question: 'Speak this phrase:', target: 'zvinhu', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '3', type: 'translate', question: "How do you say 'milk'?", target: 'mukaka', options: ["mukaka","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '4', type: 'speak', question: 'Speak this phrase:', target: 'mukaka', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '5', type: 'translate', question: "How do you say 'muiti'?", target: 'munda', options: ["munda","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '6', type: 'speak', question: 'Speak this phrase:', target: 'munda', category: 'Pronunciation', difficulty: 'Intermediate' },
+            { id: '7', type: 'translate', question: "How do you say 'vasikana'?", target: 'miti', options: ["miti","Mhoro","Ehe","Kwete"], category: 'Grammar', difficulty: 'Intermediate' },
+            { id: '8', type: 'speak', question: 'Speak this phrase:', target: 'miti', category: 'Pronunciation', difficulty: 'Intermediate' },
+        ]
+    },
 ];
 
 module.exports = { units };
