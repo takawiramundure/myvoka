@@ -103,6 +103,13 @@ The user's speech was just transcribed as: "${userText}".
 - Script/Tone: The app displays Latin transliteration but treats it as the spoken Ge'ez script. Read inputs phonetically. Ejective consonants (like k', t', ch') are sharp and explosive.
 - Cultural Note: Deep respect for age and hierarchy. Honorifics (like "Etu" for older sister) are heavily used.
 `;
+        } else if (language.toLowerCase() === 'shona') {
+            systemPrompt += `SHONA LINGUISTIC CONTEXT:
+- Grammar: Bantu language. Heavily reliant on noun classes and prefixes/suffixes (agglutinative). Subject-Verb-Object (SVO) order.
+- Common Greetings: "Mhoro" (Hello - singular), "Mhoroi" (Hello - polite/plural), "Wakadini?" or "Makadii?" (How are you?), "Ndiripo" (I am fine), "Maita basa" / "Ndatenda" (Thank you).
+- Pronunciation & Tone: Tonal language. Consonant clusters like "sv" or "zv" (whistling fricatives) are unique to Shona. 
+- Cultural Note: Greeting is very important and usually asked in plural ("Makadii") as a sign of respect, even to one person. Handclaps often accompany "Maita basa". Ensure responses reflect this warmth and politeness.
+`;
         }
 
         systemPrompt += `

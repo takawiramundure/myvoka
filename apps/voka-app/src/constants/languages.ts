@@ -79,7 +79,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
         name: 'Shona',
         nativeName: 'ChiShona',
         flag: '🇿🇼',
-        status: 'beta',
+        status: 'available',
         learners: '3k',
     },
     {
