@@ -9,6 +9,7 @@ import { playElevenLabsAudio, prefetchElevenLabsAudio } from '../../services/ele
 import { db } from '../../services/firebase';
 import { collection, query, getDocs, doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { useAuthStore } from '../../stores/useAuthStore';
+import LessonRecordButton from '../../components/LessonRecordButton';
 
 interface Exercise {
     id: string;
@@ -35,6 +36,7 @@ export default function LessonSessionScreen() {
     const [isFinished, setIsFinished] = useState(false);
     const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
     const [feedback, setFeedback] = useState<'correct' | null | 'incorrect'>(null);
+    const [aiFeedbackMsg, setAiFeedbackMsg] = useState<string | null>(null);
     const [progress] = useState(new Animated.Value(0));
     const [correctCount, setCorrectCount] = useState(0);
 
@@ -123,14 +125,7 @@ export default function LessonSessionScreen() {
         const normalize = (text: string) => text.toLowerCase().replace(/[.,/#!?$%^&*;:{}=\-_`~()]/g, "").trim();
 
         if (currentExercise.type === 'speak') {
-            // For now, simulate correct pronunciation automatically
-            setFeedback('correct');
-            setCorrectCount(prev => prev + 1);
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            addXP(10);
-            const nextProgress = (currentIndex + 1) / sessionExercises.length;
-            Animated.timing(progress, { toValue: nextProgress, duration: 500, useNativeDriver: false }).start();
-            return;
+            return; // Handled by LessonRecordButton
         }
 
         const answer = currentExercise.type === 'match' ? selectedOptions.join('-') : selectedOptions.join(' ');
@@ -156,6 +151,7 @@ export default function LessonSessionScreen() {
     const handleContinue = async () => {
         if (currentIndex < sessionExercises.length - 1) {
             setFeedback(null);
+            setAiFeedbackMsg(null);
             setSelectedOptions([]);
             setCurrentIndex(currentIndex + 1);
         } else {
@@ -389,13 +385,27 @@ export default function LessonSessionScreen() {
 
                             {currentExercise.type === 'speak' && (
                                 <View className="w-full items-center justify-center flex-1">
-                                    <TouchableOpacity
-                                        onPress={handleSubmit}
-                                        className="items-center"
-                                    >
-                                        <Ionicons name="mic-circle" size={140} color="#1A6B4A" />
-                                        <Text className="text-text-secondary mt-6 text-lg font-nunito">Tap to simulate voice</Text>
-                                    </TouchableOpacity>
+                                    <LessonRecordButton
+                                        targetText={currentExercise.target}
+                                        onResult={(isCorrect, transcript, feedbackMsg) => {
+                                            if (isCorrect) {
+                                                setFeedback('correct');
+                                                setCorrectCount(prev => prev + 1);
+                                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                                                addXP(10);
+                                                Animated.timing(progress, {
+                                                    toValue: (currentIndex + 1) / sessionExercises.length,
+                                                    duration: 500,
+                                                    useNativeDriver: false
+                                                }).start();
+                                            } else {
+                                                setFeedback('incorrect');
+                                                setAiFeedbackMsg(feedbackMsg);
+                                                decrementHeart();
+                                                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+                                            }
+                                        }}
+                                    />
                                 </View>
                             )}
 
@@ -441,10 +451,12 @@ export default function LessonSessionScreen() {
                                 <View className="flex-1">
                                     <Text className={`font-bold text-2xl ${feedback === 'correct' ? 'text-[#58CC02]' : 'text-[#EA2B2B]'
                                         }`}>
-                                        {feedback === 'correct' ? 'Awesome!' : 'Correct solution:'}
+                                        {feedback === 'correct' ? 'Awesome!' : aiFeedbackMsg ? 'Incorrect.' : 'Correct solution:'}
                                     </Text>
                                     {feedback === 'incorrect' && (
-                                        <Text className="text-[#EA2B2B] font-inter text-lg">{currentExercise.target}</Text>
+                                        <Text className="text-[#EA2B2B] font-inter text-lg">
+                                            {aiFeedbackMsg || currentExercise.target}
+                                        </Text>
                                     )}
                                 </View>
                             </View>

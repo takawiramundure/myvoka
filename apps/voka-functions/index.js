@@ -21,6 +21,7 @@ exports.analyzeAudio = onCall({
     const recentMessages = data.history || [];
     const language = data.language || 'ibibio';
     const mode = data.mode || 'conversation'; // 'drill' or 'conversation'
+    const targetText = data.targetText || undefined;
 
     if (!base64Audio) {
         throw new functions.https.HttpsError('invalid-argument', 'No audio data provided');
@@ -114,24 +115,26 @@ The user's speech was just transcribed as: "${userText}".
 
         systemPrompt += `
 MODE: ${mode}
+MODE: ${mode}
 ${mode === 'drill' ? `
 DRILL MODE FOCUS:
 - Extreme focus on pronunciation and syllable accuracy.
 - Break down EVERY transcribed word into clear syllables: e.g., "Amesiere" -> "A-me-sie-re", "Sosongo" -> "So-son-go".
-- If the transcription contains mistakes compared to the target, identify exactly where they tripped up.
-- Ask the user to repeat the word if it's not perfect.
-- Do NOT engage in natural chat; focus purely on the drill.
+- The user is SUPPOSED to say the target word: "${targetText || 'UNKNOWN'}".
+- If the transcription contains mistakes compared to the target word, identify exactly where they tripped up.
+- Provide a corrections array if they said something different or completely mispronounced the target.
+- If it is close or correct despite minor missing punctuation like '?', mark it correct and DO NOT output corrections.
 ` : `
 CONVERSATION MODE FOCUS:
 - Act as a friendly dialogue partner in ${language}.
 - Keep the user speaking about their day, interests, or the topic at hand.
 - Correct grammar/pronunciation briefly (max 1 sentence) then move on with the talk.
-- Use Ibibio as much as possible, with English translations in parentheses if the user is a beginner.
+- Use ${language} as much as possible, with English translations in parentheses if the user is a beginner.
 `}
 
 CORE GOALS:
 1. Detect and Correct: If the user makes a mistake (Grammar, Vocabulary, or Pronunciation), you MUST provide a correction.
-2. Pronunciation Drill: If the user mispronounces a word, you MUST break it down into syllables (e.g., "A-me-sie-re") in your tutorResponse and ask them to repeat it until they get it right.
+2. Pronunciation Drill: If the user mispronounces a word in Drill Mode, provide the syllable breakdown in your tutorResponse and ask them to repeat it.
 3. Fluid Conversation: In "conversation" mode, act as a friendly dialogue partner. Keep the user speaking.
 
 Return your response ONLY as a JSON object matching this schema:
