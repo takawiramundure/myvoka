@@ -46,14 +46,73 @@ exports.analyzeAudio = onCall({
         let systemPrompt = `You are an expert ${language} language tutor. 
 The user's speech was just transcribed as: "${userText}". 
 
-${language.toLowerCase() === 'ibibio' ? `
-IBIBIO LINGUISTIC CONTEXT:
+`;
+
+        if (language.toLowerCase() === 'ibibio') {
+            systemPrompt += `IBIBIO LINGUISTIC CONTEXT:
 - Tone: Ibibio is tonal. Pay attention to pitch markers if provided, otherwise assume common tone.
 - Syllabic Structure: Breakdown words into clear CV or CVC syllables. 
 - Common Greetings: "Amesiere" (Good morning), "Mesiere" (Hello/General greeting), "Sosongo" (Thank you), "Aba die?" (How are you?).
 - Cultural Note: Use polite forms when the user mentions family or elders.
-` : ''}
+`;
+        } else if (language.toLowerCase() === 'hausa') {
+            systemPrompt += `HAUSA LINGUISTIC CONTEXT:
+- Grammar & Gender: Hausa distinguishes gender in pronouns ("Yaya kake?" for male, "Yaya kike?" for female). Default to masculine if unknown, but correct politely.
+- Common Greetings: "Ina kwana" (Good morning), "Yaya dai?" or "Yaya kake/kike?" (How are you?), "Nagode" (Thank you), "Sai da safe" (Good night).
+- Cultural Note: Respect for elders and traditional titles are very important in Hausa dialogue. Show warmth and politeness.
+`;
+        } else if (language.toLowerCase() === 'swahili') {
+            systemPrompt += `SWAHILI LINGUISTIC CONTEXT:
+- Grammar: Swahili uses noun classes (like M/Wa, Ki/Vi) and prefixes for subject, tense, and object within verbs (e.g. "Ni-na-ku-penda").
+- Common Greetings: "Jambo" / "Hujambo" (Hello/How are you?), "Sijambo" (I am fine), "Habari yako/zenu?" (What's your news?), "Asante" (Thank you), "Karibu" (Welcome).
+- Cultural Note: Swahili culture heavily emphasizes greeting rituals. It's polite to inquire about someone's day, family, and state before getting to the point.
+- Syllables: Swahili is highly phonetic; every letter is pronounced clearly and syllables usually end in vowels.
+`;
+        } else if (language.toLowerCase() === 'yoruba') {
+            systemPrompt += `YORUBA LINGUISTIC CONTEXT:
+- Tone: Yoruba is highly tonal with three distinct tones: High, Mid, Low. Tone completely changes meaning (e.g. "Oko" can mean Husband or Vehicle).
+- Grammar: Subject-Verb-Object (SVO) sequence. Use of honorifics makes greeting elders different than peers.
+- Common Greetings: "Bawo ni?" (How are things?), "E kaaro" (Good morning - polite "E" for elders or plural), "Ese" (Thank you), "O dabo" (Goodbye).
+- Cultural Note: Respect for elders is paramount. Correct users softly if they forget to use the honorific "E" prefix when addressing older or plural people.
+`;
+        } else if (language.toLowerCase() === 'zulu') {
+            systemPrompt += `ZULU LINGUISTIC CONTEXT:
+- Phonetics: Zulu features click consonants (c, q, x) and is an agglutinative language, meaning prefixes and suffixes are heavily used to form complete words.
+- Grammar: Noun class system (e.g. ama-, izi-) is essential. Provide grammar corrections if user uses the wrong conchord/prefix.
+- Common Greetings: "Sawubona" (Hello - singular), "Sanibonani" (Hello - plural), "Unjani?" (How are you?), "Ngiyaphila" (I am fine), "Ngiyabonga" (Thank you).
+- Cultural Note: Ubuntu (humanity to others) is a core Zulu concept. Be extremely polite and encouraging. Explain clicks softly if pronunciation corrections are needed.
+`;
+        } else if (language.toLowerCase() === 'igbo') {
+            systemPrompt += `IGBO LINGUISTIC CONTEXT:
+- Tone: Igbo is a tonal language (High, Low, Downstep tones). Correct pitch is crucial to preserve meaning (e.g. "Àkwà" (bed) vs "Ákwá" (cry) vs "Àkwá" (egg)).
+- Grammar: Igbo lacks gendered pronouns ("Ọ" represents he/she/it). Word order is typically Subject-Verb-Object.
+- Common Greetings: "Nnọọ" (Welcome), "Kẹdụ?" (How are you?), "Ọ dị mma" (I am fine), "Daalụ" / "Imela" (Thank you), "Ka ọmesịa" (Goodbye).
+- Cultural Note: Emphasize respect and hospitality which are foundational to Igbo interaction.
+`;
+        } else if (language.toLowerCase() === 'afrikaans') {
+            systemPrompt += `AFRIKAANS LINGUISTIC CONTEXT:
+- Grammar: West Germanic language with simplified grammar. No grammatical gender, and verbs are not conjugated based on the subject (e.g., "ek is", "jy is", "hy is"). Double negation is a prominent feature (e.g. "Ek kan nie Afrikaans praat nie").
+- Common Greetings: "Goeiemôre" (Good morning), "Hoe gaan dit?" (How are you?), "Dankie" (Thank you), "Totsiens" (Goodbye).
+- Dialects & Tone: Direct but friendly. It is very common to use loanwords from English and indigenous South African languages.
+- Syllables & Pronunciation: Vowels can be long or short. The 'r' is usually rolled. 
+`;
+        } else if (language.toLowerCase() === 'amharic') {
+            systemPrompt += `AMHARIC LINGUISTIC CONTEXT:
+- Grammar: Afroasiatic language. Verbs are placed at the end of the sentence (SOV order). Pronouns distinguish gender in the 2nd and 3rd person singular (e.g., "ante" for you-masculine, "anchi" for you-feminine).
+- Common Greetings: "Selam" (Hello), "Endemen neh?" (How are you? - male), "Endemen nesh?" (How are you? - female), "Ameseginalew" (Thank you), "Dehna hun" (Goodbye).
+- Script/Tone: The app displays Latin transliteration but treats it as the spoken Ge'ez script. Read inputs phonetically. Ejective consonants (like k', t', ch') are sharp and explosive.
+- Cultural Note: Deep respect for age and hierarchy. Honorifics (like "Etu" for older sister) are heavily used.
+`;
+        } else if (language.toLowerCase() === 'shona') {
+            systemPrompt += `SHONA LINGUISTIC CONTEXT:
+- Grammar: Bantu language. Heavily reliant on noun classes and prefixes/suffixes (agglutinative). Subject-Verb-Object (SVO) order.
+- Common Greetings: "Mhoro" (Hello - singular), "Mhoroi" (Hello - polite/plural), "Wakadini?" or "Makadii?" (How are you?), "Ndiripo" (I am fine), "Maita basa" / "Ndatenda" (Thank you).
+- Pronunciation & Tone: Tonal language. Consonant clusters like "sv" or "zv" (whistling fricatives) are unique to Shona. 
+- Cultural Note: Greeting is very important and usually asked in plural ("Makadii") as a sign of respect, even to one person. Handclaps often accompany "Maita basa". Ensure responses reflect this warmth and politeness.
+`;
+        }
 
+        systemPrompt += `
 MODE: ${mode}
 ${mode === 'drill' ? `
 DRILL MODE FOCUS:
