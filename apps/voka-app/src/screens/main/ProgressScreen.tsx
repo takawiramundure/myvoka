@@ -1,15 +1,67 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useConversationStore } from '../../stores/useConversationStore';
+import { useAuthStore } from '../../stores/useAuthStore';
+import { SUPPORTED_LANGUAGES } from '../../constants/languages';
+import { db } from '../../services/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function ProgressScreen() {
     // Dynamic values from global store
-    const { xp, streak, levelProgress, selectedLanguage, flashcardsCompleted, recentSessions } = useConversationStore();
+    const { xp, streak, selectedLanguage, flashcardsCompleted, recentSessions } = useConversationStore();
+    const { user } = useAuthStore();
 
-    // Calculate level (1 level exactly per 100 XP)
-    const calculatedLevel = Math.floor(xp / 100) + 1;
+    // We will store an array of language progress objects
+    const [languageStats, setLanguageStats] = useState<{ id: string, name: string, level: number, progress: number }[]>([]);
+
+    useEffect(() => {
+        const fetchAllProgress = async () => {
+            if (user?.uid) {
+                try {
+                    const docRef = doc(db, 'users', user.uid);
+                    const userDoc = await getDoc(docRef);
+
+                    if (userDoc.exists() && userDoc.data().completedUnits) {
+                        const completedMap = userDoc.data().completedUnits;
+                        const stats = [];
+
+                        // Map over supported languages to find matching progress
+                        for (const lang of SUPPORTED_LANGUAGES) {
+                            if (completedMap[lang.id] || lang.id === selectedLanguage) {
+                                const completed = completedMap[lang.id] || [];
+                                const percentage = Math.round((completed.length / 6) * 100);
+                                const safePercentage = Math.min(percentage, 100);
+
+                                stats.push({
+                                    id: lang.id,
+                                    name: lang.name,
+                                    level: Math.floor(xp / 100) + 1, // Currently XP is global, could be scoped per language later
+                                    progress: safePercentage
+                                });
+                            }
+                        }
+                        setLanguageStats(stats);
+                    } else {
+                        // Fallback to purely local state for the first language
+                        const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.id === selectedLanguage) || SUPPORTED_LANGUAGES[0];
+                        setLanguageStats([{
+                            id: currentLangObj.id,
+                            name: currentLangObj.name,
+                            level: Math.floor(xp / 100) + 1,
+                            progress: 0
+                        }]);
+                    }
+                } catch (e) {
+                    console.error("Error fetching progress: ", e);
+                }
+            }
+        };
+
+        // Re-fetch when user or selectedLanguage changes
+        fetchAllProgress();
+    }, [user, selectedLanguage, xp]);
 
     return (
         <SafeAreaView className="flex-1 bg-background pt-4">
@@ -52,23 +104,28 @@ export default function ProgressScreen() {
                 {/* Proficiency Levels */}
                 <Text className="text-text-primary font-poppins font-semibold text-lg mb-4">Proficiency</Text>
 
-                {/* Dynamic Selected Language Skill */}
-                <View className="bg-surface border border-surface-light rounded-2xl p-5 mb-8">
-                    <View className="flex-row items-center justify-between mb-2">
-                        <Text className="text-text-primary font-poppins font-semibold capitalize">{selectedLanguage}</Text>
-                        <Text className="text-primary font-bold">Level {calculatedLevel}</Text>
-                    </View>
+                {languageStats.map((stat) => (
+                    <View key={stat.id} className="bg-surface border border-surface-light rounded-2xl p-5 mb-4">
+                        <View className="flex-row items-center justify-between mb-2">
+                            <Text className="text-text-primary font-poppins font-semibold capitalize">{stat.name}</Text>
+                            <Text className="text-primary font-bold">Level {stat.level}</Text>
+                        </View>
 
-                    <View className="h-2 w-full bg-surface-light rounded-full overflow-hidden mb-3">
-                        {/* Dynamic width from state (0 - 100) */}
-                        <View className="h-full bg-primary rounded-full" style={{ width: `${levelProgress}%` }} />
-                    </View>
+                        <View className="flex-row items-center justify-between mb-1">
+                            <View className="h-2 flex-1 bg-surface-light rounded-full overflow-hidden mr-3">
+                                <View className="h-full bg-primary rounded-full" style={{ width: `${stat.progress}%` }} />
+                            </View>
+                            <Text className="text-text-secondary text-xs font-bold w-8 text-right">{stat.progress}%</Text>
+                        </View>
 
-                    <View className="flex-row items-center justify-between">
-                        <Text className="text-text-secondary text-xs font-inter">Flashcards Learned: {flashcardsCompleted * 30}</Text>
-                        <Text className="text-text-secondary text-xs font-inter">Grammar: 60%</Text>
+                        <View className="flex-row items-center justify-between mt-2">
+                            <Text className="text-text-secondary text-xs font-inter">Flashcards Learned: {stat.id === selectedLanguage ? flashcardsCompleted * 30 : 0}</Text>
+                            <Text className="text-text-secondary text-xs font-inter">Grammar: {stat.id === selectedLanguage ? '60%' : '0%'}</Text>
+                        </View>
                     </View>
-                </View>
+                ))}
+
+                <View className="mb-4" />
 
                 {/* Session History Section */}
                 <View className="flex-row items-center justify-between mb-4">
