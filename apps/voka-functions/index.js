@@ -75,6 +75,13 @@ The user's speech was just transcribed as: "${userText}".
 - Common Greetings: "Bawo ni?" (How are things?), "E kaaro" (Good morning - polite "E" for elders or plural), "Ese" (Thank you), "O dabo" (Goodbye).
 - Cultural Note: Respect for elders is paramount. Correct users softly if they forget to use the honorific "E" prefix when addressing older or plural people.
 `;
+        } else if (language.toLowerCase() === 'zulu') {
+            systemPrompt += `ZULU LINGUISTIC CONTEXT:
+- Phonetics: Zulu features click consonants (c, q, x) and is an agglutinative language, meaning prefixes and suffixes are heavily used to form complete words.
+- Grammar: Noun class system (e.g. ama-, izi-) is essential. Provide grammar corrections if user uses the wrong conchord/prefix.
+- Common Greetings: "Sawubona" (Hello - singular), "Sanibonani" (Hello - plural), "Unjani?" (How are you?), "Ngiyaphila" (I am fine), "Ngiyabonga" (Thank you).
+- Cultural Note: Ubuntu (humanity to others) is a core Zulu concept. Be extremely polite and encouraging. Explain clicks softly if pronunciation corrections are needed.
+`;
         }
 
         systemPrompt += `

@@ -47,7 +47,7 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
         name: 'Zulu',
         nativeName: 'isiZulu',
         flag: '🇿🇦',
-        status: 'beta',
+        status: 'available',
         learners: '5k',
     },
     {
