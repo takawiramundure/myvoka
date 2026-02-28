@@ -82,6 +82,13 @@ The user's speech was just transcribed as: "${userText}".
 - Common Greetings: "Sawubona" (Hello - singular), "Sanibonani" (Hello - plural), "Unjani?" (How are you?), "Ngiyaphila" (I am fine), "Ngiyabonga" (Thank you).
 - Cultural Note: Ubuntu (humanity to others) is a core Zulu concept. Be extremely polite and encouraging. Explain clicks softly if pronunciation corrections are needed.
 `;
+        } else if (language.toLowerCase() === 'igbo') {
+            systemPrompt += `IGBO LINGUISTIC CONTEXT:
+- Tone: Igbo is a tonal language (High, Low, Downstep tones). Correct pitch is crucial to preserve meaning (e.g. "Àkwà" (bed) vs "Ákwá" (cry) vs "Àkwá" (egg)).
+- Grammar: Igbo lacks gendered pronouns ("Ọ" represents he/she/it). Word order is typically Subject-Verb-Object.
+- Common Greetings: "Nnọọ" (Welcome), "Kẹdụ?" (How are you?), "Ọ dị mma" (I am fine), "Daalụ" / "Imela" (Thank you), "Ka ọmesịa" (Goodbye).
+- Cultural Note: Emphasize respect and hospitality which are foundational to Igbo interaction.
+`;
         }
 
         systemPrompt += `

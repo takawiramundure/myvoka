@@ -51,6 +51,14 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
         learners: '5k',
     },
     {
+        id: 'igbo',
+        name: 'Igbo',
+        nativeName: 'Asụsụ Igbo',
+        flag: '🇳🇬',
+        status: 'available',
+        learners: '6k',
+    },
+    {
         id: 'shona',
         name: 'Shona',
         nativeName: 'ChiShona',
