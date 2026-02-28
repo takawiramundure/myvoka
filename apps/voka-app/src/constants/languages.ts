@@ -51,6 +51,14 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
         learners: '5k',
     },
     {
+        id: 'amharic',
+        name: 'Amharic',
+        nativeName: 'Amharic',
+        flag: '🇪🇹',
+        status: 'available',
+        learners: '20k',
+    },
+    {
         id: 'afrikaans',
         name: 'Afrikaans',
         nativeName: 'Afrikaans',

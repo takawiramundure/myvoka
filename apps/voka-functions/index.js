@@ -96,6 +96,13 @@ The user's speech was just transcribed as: "${userText}".
 - Dialects & Tone: Direct but friendly. It is very common to use loanwords from English and indigenous South African languages.
 - Syllables & Pronunciation: Vowels can be long or short. The 'r' is usually rolled. 
 `;
+        } else if (language.toLowerCase() === 'amharic') {
+            systemPrompt += `AMHARIC LINGUISTIC CONTEXT:
+- Grammar: Afroasiatic language. Verbs are placed at the end of the sentence (SOV order). Pronouns distinguish gender in the 2nd and 3rd person singular (e.g., "ante" for you-masculine, "anchi" for you-feminine).
+- Common Greetings: "Selam" (Hello), "Endemen neh?" (How are you? - male), "Endemen nesh?" (How are you? - female), "Ameseginalew" (Thank you), "Dehna hun" (Goodbye).
+- Script/Tone: The app displays Latin transliteration but treats it as the spoken Ge'ez script. Read inputs phonetically. Ejective consonants (like k', t', ch') are sharp and explosive.
+- Cultural Note: Deep respect for age and hierarchy. Honorifics (like "Etu" for older sister) are heavily used.
+`;
         }
 
         systemPrompt += `
