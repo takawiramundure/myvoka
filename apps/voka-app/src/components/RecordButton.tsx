@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 import Animated, {
@@ -20,7 +20,8 @@ import * as FileSystem from 'expo-file-system/legacy';
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export default function RecordButton() {
-    const [recording, setRecording] = useState<Audio.Recording | null>(null);
+    const recordingRef = useRef<Audio.Recording | null>(null);
+    const isStartingRef = useRef(false);
     const isRecording = useConversationStore((s) => s.isRecording);
     const {
         setRecording: setRecordingState,
@@ -55,6 +56,9 @@ export default function RecordButton() {
     }));
 
     async function startRecording() {
+        if (isStartingRef.current || recordingRef.current) return;
+        isStartingRef.current = true;
+
         try {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             const permission = await Audio.requestPermissionsAsync();
@@ -69,97 +73,100 @@ export default function RecordButton() {
                     Audio.RecordingOptionsPresets.HIGH_QUALITY
                 );
 
-                setRecording(recording);
+                recordingRef.current = recording;
                 setRecordingState(true);
             }
         } catch (err) {
             console.error('Failed to start recording', err);
+        } finally {
+            isStartingRef.current = false;
         }
     }
 
     async function stopRecording() {
+        if (!recordingRef.current) return;
+
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         setRecordingState(false);
 
-        if (recording) {
-            try {
-                await recording.stopAndUnloadAsync();
-                await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+        const currentRecording = recordingRef.current;
+        recordingRef.current = null;
 
-                const uri = recording.getURI();
-                console.log('Recording stopped and stored at', uri);
+        try {
+            await currentRecording.stopAndUnloadAsync();
+            await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
 
-                if (!uri) return;
+            const uri = currentRecording.getURI();
+            console.log('Recording stopped and stored at', uri);
 
-                setCurrentTranscript('Transcribing...');
+            if (!uri) return;
 
-                // 1. Convert audio file to Base64
-                const base64Audio = await FileSystem.readAsStringAsync(uri, {
-                    encoding: 'base64',
-                });
+            setCurrentTranscript('Transcribing...');
 
-                // 2. Call Firebase Cloud Function
-                const analyzeAudioFn = httpsCallable(functions, 'analyzeAudio');
+            // 1. Convert audio file to Base64
+            const base64Audio = await FileSystem.readAsStringAsync(uri, {
+                encoding: 'base64',
+            });
 
-                // Get history for context (last 5 messages)
-                const history = messages.slice(-5);
+            // 2. Call Firebase Cloud Function
+            const analyzeAudioFn = httpsCallable(functions, 'analyzeAudio');
 
-                const result: any = await analyzeAudioFn({
-                    audio: base64Audio,
-                    sessionPhase: sessionPhase,
-                    history: history,
-                    language: selectedLanguage,
-                    mode: activeMode
-                });
+            // Get history for context (last 5 messages)
+            const history = messages.slice(-5);
 
-                const { userText, tutorResponse, corrections, nextPhase } = result.data as { userText: string, tutorResponse: string, corrections: any[], nextPhase?: string };
+            const result: any = await analyzeAudioFn({
+                audio: base64Audio,
+                sessionPhase: sessionPhase,
+                history: history,
+                language: selectedLanguage,
+                mode: activeMode
+            });
 
-                // 3. Update UI with User Text
-                addMessage({
-                    id: Date.now().toString(),
-                    role: 'user',
-                    text: userText,
-                    timestamp: new Date()
-                });
+            const { userText, tutorResponse, corrections, nextPhase } = result.data as { userText: string, tutorResponse: string, corrections: any[], nextPhase?: string };
 
-                setCurrentTranscript('Correcting...');
-                await delay(500);
-                setCurrentTranscript('');
+            // 3. Update UI with User Text
+            addMessage({
+                id: Date.now().toString(),
+                role: 'user',
+                text: userText,
+                timestamp: new Date()
+            });
 
-                // 4. Update UI with Tutor Response
-                addMessage({
-                    id: (Date.now() + 1).toString(),
-                    role: 'tutor',
-                    text: tutorResponse,
-                    timestamp: new Date(),
-                    corrections: corrections && corrections.length > 0 ? corrections : undefined
-                });
+            setCurrentTranscript('Correcting...');
+            await delay(500);
+            setCurrentTranscript('');
 
-                // 5. Fire ElevenLabs TTS
-                await playElevenLabsAudio(tutorResponse);
+            // 4. Update UI with Tutor Response
+            addMessage({
+                id: (Date.now() + 1).toString(),
+                role: 'tutor',
+                text: tutorResponse,
+                timestamp: new Date(),
+                corrections: corrections && corrections.length > 0 ? corrections : undefined
+            });
 
-                // 6. Handle automatic phase transitions
-                if (nextPhase) {
-                    setSessionPhase(nextPhase as any);
-                } else if (sessionPhase === 'greeting') {
-                    setSessionPhase('quiz');
-                } else if (sessionPhase === 'quiz') {
-                    // Logic for quiz index (if not guided by nextPhase)
-                    if (quizQuestionIndex < 2) {
-                        setQuizQuestionIndex(quizQuestionIndex + 1);
-                    } else {
-                        setSessionPhase('conversation'); // Default to conversation after quiz
-                    }
+            // 5. Fire ElevenLabs TTS
+            await playElevenLabsAudio(tutorResponse);
+
+            // 6. Handle automatic phase transitions
+            if (nextPhase) {
+                setSessionPhase(nextPhase as any);
+            } else if (sessionPhase === 'greeting') {
+                setSessionPhase('quiz');
+            } else if (sessionPhase === 'quiz') {
+                // Logic for quiz index (if not guided by nextPhase)
+                if (quizQuestionIndex < 2) {
+                    setQuizQuestionIndex(quizQuestionIndex + 1);
+                } else {
+                    setSessionPhase('conversation'); // Default to conversation after quiz
                 }
-
-            } catch (err) {
-                console.error('AI Processing Error:', err);
-                setCurrentTranscript('Error processing voice.');
-                await delay(2000);
-                setCurrentTranscript('');
-            } finally {
-                setRecording(null);
             }
+
+        } catch (err) {
+            console.error('AI Processing Error:', err);
+            setCurrentTranscript('Error processing voice.');
+            await delay(2000);
+            setCurrentTranscript('');
         }
     }
 
