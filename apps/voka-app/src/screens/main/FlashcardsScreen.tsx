@@ -7,6 +7,9 @@ import Animated, { interpolate, useAnimatedStyle, useSharedValue, withSpring, wi
 import { useConversationStore } from '../../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
 import { playElevenLabsAudio, prefetchElevenLabsAudio } from '../../services/elevenlabs';
+import { db } from '../../services/firebase';
+import { doc, getDoc, setDoc, arrayUnion } from 'firebase/firestore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 const { width } = Dimensions.get('window');
 
@@ -162,6 +165,7 @@ const Flashcard = ({ card, onFlip }: { card: { front: string; back: string }, on
 export default function FlashcardsScreen() {
     const navigation = useNavigation<any>();
     const { selectedLanguage } = useConversationStore();
+    const { user } = useAuthStore();
 
     // Safety check in case the language isn't valid in our mock data
     const safeLanguage = selectedLanguage in flashcardsData ? selectedLanguage : 'ibibio';
@@ -184,16 +188,64 @@ export default function FlashcardsScreen() {
         }
     }, [currentIndex]);
 
-    const handleNext = () => {
+    const handleNext = async () => {
         if (currentIndex < cards.length - 1) {
             setCurrentIndex(currentIndex + 1);
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         } else {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-            // Reached end of deck — increment metric
+            // Reached end of deck — increment metric locally
             const { incrementFlashcardsCompleted } = useConversationStore.getState();
             incrementFlashcardsCompleted();
+
+            // Persist streak and history to Firebase
+            if (user?.uid) {
+                try {
+                    const userRef = doc(db, 'users', user.uid);
+                    const userDocSnap = await getDoc(userRef);
+
+                    let newStreak = 1;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (userDocSnap.exists()) {
+                        const data = userDocSnap.data();
+                        const lastPractice = data.lastPracticeDate ? new Date(data.lastPracticeDate) : null;
+
+                        if (lastPractice) {
+                            lastPractice.setHours(0, 0, 0, 0);
+                            const diffTime = Math.abs(today.getTime() - lastPractice.getTime());
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays === 1) {
+                                newStreak = (data.streak || 0) + 1;
+                            } else if (diffDays === 0) {
+                                newStreak = data.streak || 1; // Already practiced today
+                            } else {
+                                newStreak = 1; // Streak broken
+                            }
+                        }
+                    }
+
+                    const sessionItem = {
+                        id: Math.random().toString(36).substring(2, 9),
+                        title: `${selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)} • Flashcards`,
+                        type: 'Flashcards',
+                        durationMin: Math.max(1, Math.floor(cards.length / 5)), // Roughly 1 min per 5 cards
+                        date: new Date().toISOString()
+                    };
+
+                    await setDoc(userRef, {
+                        streak: newStreak,
+                        lastPracticeDate: new Date().toISOString(),
+                        recentHistory: arrayUnion(sessionItem)
+                    }, { merge: true });
+
+                } catch (err) {
+                    console.error("Failed to save flashcard progress", err);
+                }
+            }
 
             navigation.goBack();
         }

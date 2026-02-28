@@ -7,7 +7,7 @@ import { useConversationStore } from '../../stores/useConversationStore';
 import * as Haptics from 'expo-haptics';
 import { playElevenLabsAudio, prefetchElevenLabsAudio } from '../../services/elevenlabs';
 import { db } from '../../services/firebase';
-import { collection, query, getDocs, doc, setDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, getDocs, doc, setDoc, arrayUnion, getDoc, updateDoc } from 'firebase/firestore';
 import { useAuthStore } from '../../stores/useAuthStore';
 import LessonRecordButton from '../../components/LessonRecordButton';
 
@@ -158,15 +158,61 @@ export default function LessonSessionScreen() {
             // Lesson is completely finished!
             setIsFinished(true);
 
-            // Mark the unit as completed in Firestore
             if (user?.uid) {
                 try {
                     const unitKey = `unit_${lessonId}`;
-                    await setDoc(doc(db, 'users', user.uid), {
+                    const userRef = doc(db, 'users', user.uid);
+                    const userDocSnap = await getDoc(userRef);
+
+                    let newStreak = 1;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    // Streak Calculation if user exists
+                    if (userDocSnap.exists()) {
+                        const data = userDocSnap.data();
+                        const lastPractice = data.lastPracticeDate ? new Date(data.lastPracticeDate) : null;
+
+                        if (lastPractice) {
+                            lastPractice.setHours(0, 0, 0, 0);
+                            const diffTime = Math.abs(today.getTime() - lastPractice.getTime());
+                            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                            if (diffDays === 1) {
+                                newStreak = (data.streak || 0) + 1;
+                            } else if (diffDays === 0) {
+                                newStreak = data.streak || 1; // Already practiced today
+                            } else {
+                                newStreak = 1; // Streak broken
+                            }
+                        }
+                    }
+
+                    // Save XP, Streak, Unit, History
+                    const sessionItem = {
+                        id: Math.random().toString(36).substring(2, 9),
+                        title: `${selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)} • Unit ${lessonId}`,
+                        type: 'Conversation',
+                        durationMin: 5, // Hardcoded estimate for now
+                        date: new Date().toISOString()
+                    };
+
+                    await setDoc(userRef, {
                         completedUnits: {
                             [selectedLanguage]: arrayUnion(unitKey)
-                        }
+                        },
+                        streak: newStreak,
+                        lastPracticeDate: new Date().toISOString(),
+                        recentHistory: arrayUnion(sessionItem)
                     }, { merge: true });
+
+                    // Also push to Zustand to reflect instantly in UI
+                    useConversationStore.getState().addRecentSession({
+                        title: sessionItem.title,
+                        type: 'Conversation',
+                        durationMin: 5
+                    });
+
                 } catch (err) {
                     console.error("Failed to save progress", err);
                 }

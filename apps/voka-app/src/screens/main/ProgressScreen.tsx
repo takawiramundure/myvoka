@@ -10,11 +10,13 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export default function ProgressScreen() {
     // Dynamic values from global store
-    const { xp, streak, selectedLanguage, flashcardsCompleted, recentSessions } = useConversationStore();
+    const { xp, selectedLanguage, flashcardsCompleted } = useConversationStore();
     const { user } = useAuthStore();
 
-    // We will store an array of language progress objects
+    // Local states connected to Firestore
     const [languageStats, setLanguageStats] = useState<{ id: string, name: string, level: number, progress: number }[]>([]);
+    const [dbStreak, setDbStreak] = useState(0);
+    const [dbRecentSessions, setDbRecentSessions] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchAllProgress = async () => {
@@ -23,35 +25,47 @@ export default function ProgressScreen() {
                     const docRef = doc(db, 'users', user.uid);
                     const userDoc = await getDoc(docRef);
 
-                    if (userDoc.exists() && userDoc.data().completedUnits) {
-                        const completedMap = userDoc.data().completedUnits;
-                        const stats = [];
+                    if (userDoc.exists()) {
+                        const data = userDoc.data();
+                        setDbStreak(data.streak || 0);
 
-                        // Map over supported languages to find matching progress
-                        for (const lang of SUPPORTED_LANGUAGES) {
-                            if (completedMap[lang.id] || lang.id === selectedLanguage) {
-                                const completed = completedMap[lang.id] || [];
-                                const percentage = Math.round((completed.length / 6) * 100);
-                                const safePercentage = Math.min(percentage, 100);
-
-                                stats.push({
-                                    id: lang.id,
-                                    name: lang.name,
-                                    level: Math.floor(xp / 100) + 1, // Currently XP is global, could be scoped per language later
-                                    progress: safePercentage
-                                });
-                            }
+                        // Map recent history from Firebase
+                        if (data.recentHistory) {
+                            // Firebase arrayUnion appends, so we reverse it to easily show newest first
+                            const historyReversed = [...data.recentHistory].reverse().slice(0, 5);
+                            setDbRecentSessions(historyReversed);
                         }
-                        setLanguageStats(stats);
-                    } else {
-                        // Fallback to purely local state for the first language
-                        const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.id === selectedLanguage) || SUPPORTED_LANGUAGES[0];
-                        setLanguageStats([{
-                            id: currentLangObj.id,
-                            name: currentLangObj.name,
-                            level: Math.floor(xp / 100) + 1,
-                            progress: 0
-                        }]);
+
+                        if (data.completedUnits) {
+                            const completedMap = data.completedUnits;
+                            const stats = [];
+
+                            // Map over supported languages to find matching progress
+                            for (const lang of SUPPORTED_LANGUAGES) {
+                                if (completedMap[lang.id] || lang.id === selectedLanguage) {
+                                    const completed = completedMap[lang.id] || [];
+                                    const percentage = Math.round((completed.length / 6) * 100);
+                                    const safePercentage = Math.min(percentage, 100);
+
+                                    stats.push({
+                                        id: lang.id,
+                                        name: lang.name,
+                                        level: Math.floor(xp / 100) + 1, // Currently XP is global, could be scoped per language later
+                                        progress: safePercentage
+                                    });
+                                }
+                            }
+                            setLanguageStats(stats);
+                        } else {
+                            // Fallback to purely local state for the first language
+                            const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.id === selectedLanguage) || SUPPORTED_LANGUAGES[0];
+                            setLanguageStats([{
+                                id: currentLangObj.id,
+                                name: currentLangObj.name,
+                                level: Math.floor(xp / 100) + 1,
+                                progress: 0
+                            }]);
+                        }
                     }
                 } catch (e) {
                     console.error("Error fetching progress: ", e);
@@ -78,14 +92,14 @@ export default function ProgressScreen() {
                         <Text className="text-text-primary font-poppins font-semibold text-lg">Weekly Streak</Text>
                         <View className="flex-row items-center bg-secondary/10 px-3 py-1 rounded-full">
                             <Ionicons name="flame" size={16} color="#E8A020" />
-                            <Text className="text-secondary font-bold ml-1">{streak} Days</Text>
+                            <Text className="text-secondary font-bold ml-1">{dbStreak} Days</Text>
                         </View>
                     </View>
 
                     <View className="flex-row justify-between mt-2">
                         {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => {
                             // Simple logic mapping streak to first `streak` days of the week (max 7)
-                            const isCompleted = i < Math.min(streak, 7);
+                            const isCompleted = i < Math.min(dbStreak, 7);
                             return (
                                 <View key={i} className="items-center">
                                     <View className={`w-8 h-8 rounded-full items-center justify-center mb-1 ${isCompleted ? 'bg-primary' : 'bg-surface-light'}`}>
@@ -130,17 +144,17 @@ export default function ProgressScreen() {
                 {/* Session History Section */}
                 <View className="flex-row items-center justify-between mb-4">
                     <Text className="text-text-primary font-poppins font-semibold text-lg">Recent History</Text>
-                    {recentSessions.length > 0 && <Text className="text-primary text-sm font-inter">View All</Text>}
+                    {dbRecentSessions.length > 0 && <Text className="text-primary text-sm font-inter">View All</Text>}
                 </View>
 
-                {recentSessions.length === 0 ? (
+                {dbRecentSessions.length === 0 ? (
                     <View className="bg-surface border border-surface-light rounded-2xl p-6 mb-4 items-center justify-center">
                         <Ionicons name="time-outline" size={32} color="#8B949E" className="mb-2" />
-                        <Text className="text-text-secondary font-inter text-center mt-2">No recent practice sessions yet.{'\n'}Start learning to build your history!</Text>
+                        <Text className="text-text-secondary font-inter text-center mt-2">No history yet. In progress!{'\n'}Start learning to build your history!</Text>
                     </View>
                 ) : (
-                    recentSessions.map((session) => (
-                        <View key={session.id} className="bg-surface border border-surface-light rounded-2xl p-4 mb-4 flex-row items-center justify-between">
+                    dbRecentSessions.map((session, index) => (
+                        <View key={session.id || index} className="bg-surface border border-surface-light rounded-2xl p-4 mb-4 flex-row items-center justify-between">
                             <View className="flex-row items-center">
                                 <View className={`w-10 h-10 rounded-full items-center justify-center mr-3 ${session.type === 'Flashcards' ? 'bg-neon-cyan/10' : 'bg-primary/10'}`}>
                                     <Ionicons
@@ -152,7 +166,7 @@ export default function ProgressScreen() {
                                 <View>
                                     <Text className="text-text-primary font-inter font-semibold">{session.title}</Text>
                                     <Text className="text-text-secondary text-xs">
-                                        {session.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {session.durationMin} min
+                                        {new Date(session.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} • {session.durationMin} min
                                     </Text>
                                 </View>
                             </View>

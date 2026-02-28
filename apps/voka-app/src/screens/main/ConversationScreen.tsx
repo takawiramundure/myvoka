@@ -10,10 +10,14 @@ import CorrectionsOverlay from '../../components/CorrectionsOverlay';
 import { useConversationStore } from '../../stores/useConversationStore';
 import { SUPPORTED_LANGUAGES } from '../../constants/languages';
 import { playElevenLabsAudio } from '../../services/elevenlabs';
+import { db } from '../../services/firebase';
+import { doc, getDoc, setDoc, arrayUnion } from 'firebase/firestore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 export default function ConversationScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
+    const { user } = useAuthStore();
 
     const {
         selectedLanguage,
@@ -96,7 +100,57 @@ export default function ConversationScreen() {
         hintText = "Hold mic to chat with Olabisi";
     }
 
-    const handleClose = () => {
+    const handleClose = async () => {
+        const { messages, selectedLanguage } = useConversationStore.getState();
+
+        // Only save if the user interacted with the tutor
+        if (messages.length > 2 && user?.uid) {
+            try {
+                const userRef = doc(db, 'users', user.uid);
+                const userDocSnap = await getDoc(userRef);
+
+                let newStreak = 1;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (userDocSnap.exists()) {
+                    const data = userDocSnap.data();
+                    const lastPractice = data.lastPracticeDate ? new Date(data.lastPracticeDate) : null;
+
+                    if (lastPractice) {
+                        lastPractice.setHours(0, 0, 0, 0);
+                        const diffTime = Math.abs(today.getTime() - lastPractice.getTime());
+                        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (diffDays === 1) {
+                            newStreak = (data.streak || 0) + 1;
+                        } else if (diffDays === 0) {
+                            newStreak = data.streak || 1; // Already practiced today
+                        } else {
+                            newStreak = 1; // Streak broken
+                        }
+                    }
+                }
+
+                const sessionItem = {
+                    id: Math.random().toString(36).substring(2, 9),
+                    title: `${selectedLanguage.charAt(0).toUpperCase() + selectedLanguage.slice(1)} • Conversation`,
+                    type: 'Conversation',
+                    durationMin: Math.max(1, Math.floor(messages.length / 4)), // Roughly 1 min per 4 exchanges
+                    date: new Date().toISOString()
+                };
+
+                await setDoc(userRef, {
+                    streak: newStreak,
+                    lastPracticeDate: new Date().toISOString(),
+                    recentHistory: arrayUnion(sessionItem)
+                }, { merge: true });
+
+            } catch (err) {
+                console.error("Failed to save conversation progress", err);
+            }
+        }
+
         clearSession();
         navigation.goBack();
     };
